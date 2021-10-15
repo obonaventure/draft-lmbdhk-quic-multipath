@@ -1654,7 +1654,7 @@ provides more robust measurements.<a href="#section-6.2.2-5" class="pilcrow">¶<
 the 1-RTT packet. Endpoints identify the context of a path by its Connection ID or the Sequence number
 of Connection ID.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
 <p id="section-6.3-4">Following <span>[<a href="#QUIC-TRANSPORT" class="xref">QUIC-TRANSPORT</a>]</span>, each endpoint uses NEW_CONNECTION_ID frames to issue usable connections IDs
-to reach it. Before an endpoint adds a new path, it SHOULD check whether there is at least one unused
+to reach it. Before an endpoint adds a new path, it MUST check whether there is at least one unused
 available Connection ID for each side.<a href="#section-6.3-4" class="pilcrow">¶</a></p>
 <p id="section-6.3-5">If the transport parameter "active_connection_id_limit" is negotiated as N, the server provided N Connection IDs, and the client is already actively using N paths, the limit is reached. If the client wants to start a new path, it has to retire
 one of the established paths.<a href="#section-6.3-5" class="pilcrow">¶</a></p>
