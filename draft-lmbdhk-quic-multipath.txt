@@ -368,10 +368,12 @@ Table of Contents
    as defined in [QUIC-TRANSPORT], do not carry path identifiers.  If
    for some reason ACK frames are received in 1RTT packets while the
    state of multipath negotiation is ambiguous, they MUST be interpreted
-   as acknowledging packets sent on path number 0.  After endpoints
-   successfully negotiate multipath support, they SHOULD use ACK_MP
-   frames instead of ACK frames to signal acknowledgement of 1-RTT
-   packets, and also 0-RTT packets as specified in Section 6.1.
+   as acknowledging packets sent on path number 0.
+
+   If endpoints negotiate multipath support with value 1 to use multiple
+   packet number space, they SHOULD use ACK_MP frames instead of ACK
+   frames to signal acknowledgement of 1-RTT packets, and also 0-RTT
+   packets as specified in Section 6.1.
 
    1-RTT packets sent to different paths SHOULD carry different
    connection identifiers, if a non-zero connection ID is used.
@@ -409,7 +411,7 @@ Table of Contents
 6.2.  Using one packet number space
 
    If the multipath option is negotiated to use one packet number space
-   of all path, The packet sequence numbers are allocated from the
+   of all path, the packet sequence numbers are allocated from the
    common number space, so that for example path number number N could
    be sent on one path and packet number N+1 on another.
 

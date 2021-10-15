@@ -1511,10 +1511,12 @@ after a spurious estimate of path abandonment by the client.<a href="#section-3.
 <p id="section-6-1">Acknowledgements of Initial and Handshake packets MUST be carried using ACK frames, as specified in <span>[<a href="#QUIC-TRANSPORT" class="xref">QUIC-TRANSPORT</a>]</span>.
 The ACK frames, as defined in <span>[<a href="#QUIC-TRANSPORT" class="xref">QUIC-TRANSPORT</a>]</span>, do not carry path identifiers. If for some reason ACK frames are
 received in 1RTT packets while the state of multipath negotiation is ambiguous, they MUST be interpreted as acknowledging
-packets sent on path number 0. After endpoints successfully negotiate multipath support, they SHOULD use ACK_MP frames
-instead of ACK frames to signal acknowledgement of 1-RTT packets, and also 0-RTT packets as specified in <a href="#handling-of-0-rtt-packets" class="xref">Section 6.1</a>.<a href="#section-6-1" class="pilcrow">¶</a></p>
-<p id="section-6-2">1-RTT packets sent to different paths SHOULD carry different connection identifiers, if a non-zero
-connection ID is used.<a href="#section-6-2" class="pilcrow">¶</a></p>
+packets sent on path number 0.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">If endpoints negotiate multipath support with value 1 to use multiple
+packet number space, they SHOULD use ACK_MP frames
+instead of ACK frames to signal acknowledgement of 1-RTT packets, and also 0-RTT packets as specified in <a href="#handling-of-0-rtt-packets" class="xref">Section 6.1</a>.<a href="#section-6-2" class="pilcrow">¶</a></p>
+<p id="section-6-3">1-RTT packets sent to different paths SHOULD carry different connection identifiers, if a non-zero
+connection ID is used.<a href="#section-6-3" class="pilcrow">¶</a></p>
 <div id="handling-of-0-rtt-packets">
 <section id="section-6.1">
         <h3 id="name-handling-of-0-rtt-packets">
@@ -1544,7 +1546,7 @@ the first 1-RTT packets sent by the client will follow the sequence number of th
         <h3 id="name-using-one-packet-number-spa">
 <a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-using-one-packet-number-spa" class="section-name selfRef">Using one packet number space</a>
         </h3>
-<p id="section-6.2-1">If the multipath option is negotiated to use one packet number space of all path,   The packet sequence numbers are allocated from
+<p id="section-6.2-1">If the multipath option is negotiated to use one packet number space of all path, the packet sequence numbers are allocated from
 the common number space, so that for example path number number N
 could be sent on one path and packet number N+1 on another.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
 <p id="section-6.2-2">ACK frames report the numbers of packets that have been received so
