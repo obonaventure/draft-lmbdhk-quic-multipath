@@ -687,16 +687,16 @@ Table of Contents
   Client                                                          Server
 
   (client tells server to abandon a path)
-  1-RTT[X]: DCID=S2 PATH_STATUS[id=1, PSSN1, status=abandon, pri.=0] ->
+  1-RTT[X]: DCID=S2 PATH_STATUS[id=1, PSSN1, status=abandon, pri.=0]->
                                  (server tells client to abandon a path)
-  <- 1-RTT[Y]: DCID=C1 PATH_STATUS[id=2, PSSN2, status=abandon, pri.=0],
+   <-1-RTT[Y]: DCID=C1 PATH_STATUS[id=2, PSSN2, status=abandon, pri.=0],
                                                      ACK_MP[Seq=2, PN=X]
   (client abandons the path that it is using)
   1-RTT[U]: DCID=S3 RETIRE_CONNECTION_ID[2], ACK_MP[Seq=1, PN=Y] ->
                              (server abandons the path that it is using)
        <- 1-RTT[V]: DCID=C2 RETIRE_CONNECTION_ID[1], ACK_MP[Seq=3, PN=U]
 
-                 Figure 3: Example of closing a path
+       Figure 3: Example of closing a path (path id type=0x00)
 
    In scenarios such as client detects the network environment change
    (client's 4G/Wi-Fi is turned off, Wi-Fi signal is fading to a
