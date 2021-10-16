@@ -757,7 +757,7 @@ Table of Contents
    0x02 for path identifier.
 
    Error Code:  A variable-length integer that indicates the reason for
-      closing this connection.
+      abandoning this path.
 
    Reason Phrase Length:  A variable-length integer specifying the
       length of the reason phrase in bytes.  Because an PATH_ABANDON
