@@ -1237,30 +1237,33 @@ address div.right {
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
-            <p id="section-toc.1-1.10.1"><a href="#section-10" class="xref">10</a>. <a href="#name-iana-considerations" class="xref">IANA Considerations</a></p>
+            <p id="section-toc.1-1.10.1"><a href="#section-10" class="xref">10</a>. <a href="#name-error-codes" class="xref">Error Codes</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
-            <p id="section-toc.1-1.11.1"><a href="#section-11" class="xref">11</a>. <a href="#name-security-considerations" class="xref">Security Considerations</a></p>
+            <p id="section-toc.1-1.11.1"><a href="#section-11" class="xref">11</a>. <a href="#name-iana-considerations" class="xref">IANA Considerations</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
-            <p id="section-toc.1-1.12.1"><a href="#section-12" class="xref">12</a>. <a href="#name-contributors" class="xref">Contributors</a></p>
+            <p id="section-toc.1-1.12.1"><a href="#section-12" class="xref">12</a>. <a href="#name-security-considerations" class="xref">Security Considerations</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
-            <p id="section-toc.1-1.13.1"><a href="#section-13" class="xref">13</a>. <a href="#name-acknowledgments" class="xref">Acknowledgments</a></p>
+            <p id="section-toc.1-1.13.1"><a href="#section-13" class="xref">13</a>. <a href="#name-contributors" class="xref">Contributors</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
-            <p id="section-toc.1-1.14.1"><a href="#section-14" class="xref">14</a>. <a href="#name-references" class="xref">References</a></p>
-<ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.1">
-                <p id="section-toc.1-1.14.2.1.1"><a href="#section-14.1" class="xref">14.1</a>.  <a href="#name-normative-references" class="xref">Normative References</a></p>
+            <p id="section-toc.1-1.14.1"><a href="#section-14" class="xref">14</a>. <a href="#name-acknowledgments" class="xref">Acknowledgments</a></p>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.2">
-                <p id="section-toc.1-1.14.2.2.1"><a href="#section-14.2" class="xref">14.2</a>.  <a href="#name-informative-references" class="xref">Informative References</a></p>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15">
+            <p id="section-toc.1-1.15.1"><a href="#section-15" class="xref">15</a>. <a href="#name-references" class="xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15.2.1">
+                <p id="section-toc.1-1.15.2.1.1"><a href="#section-15.1" class="xref">15.1</a>.  <a href="#name-normative-references" class="xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15.2.2">
+                <p id="section-toc.1-1.15.2.2.1"><a href="#section-15.2" class="xref">15.2</a>.  <a href="#name-informative-references" class="xref">Informative References</a></p>
 </li>
             </ul>
 </li>
-          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15">
-            <p id="section-toc.1-1.15.1"><a href="#appendix-A" class="xref"></a><a href="#name-authors-addresses" class="xref">Authors' Addresses</a></p>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.16">
+            <p id="section-toc.1-1.16.1"><a href="#appendix-A" class="xref"></a><a href="#name-authors-addresses" class="xref">Authors' Addresses</a></p>
 </li>
         </ul>
 </nav>
@@ -2006,21 +2009,33 @@ associated ECN marks received on the connection up to this point.<a href="#secti
 Destination Connection ID of the 1-RTT packets which are acknowledged by the ACK_MP frame. If the endpoint receives
 1-RTT packets with 0-length Connection ID, it SHOULD use Packet Number Space Identifier 0 in ACK_MP frames.
 If an endpoint receives a ACK_MP frame with a non-existing packet number space ID, it MUST treat this
-as a connection error of type MP_CONNECTION_ERROR and close the connection.<a href="#section-9.2-5" class="pilcrow">¶</a></p>
+as a connection error of type MP_PROTOCOL_VIOLATION and close the connection.<a href="#section-9.2-5" class="pilcrow">¶</a></p>
 </section>
 </div>
+</section>
+</div>
+<div id="error-codes">
+<section id="section-10">
+      <h2 id="name-error-codes">
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-error-codes" class="section-name selfRef">Error Codes</a>
+      </h2>
+<p id="section-10-1">Multi-path QUIC transport error codes are 62-bit unsigned integers following <span>[<a href="#QUIC-TRANSPORT" class="xref">QUIC-TRANSPORT</a>]</span>.<a href="#section-10-1" class="pilcrow">¶</a></p>
+<p id="section-10-2">This section lists the defined Multi-path QUIC transport error codes that can be 
+used in a CONNECTION_CLOSE frame with a type of 0x1c.  These errors apply to the entire connection.<a href="#section-10-2" class="pilcrow">¶</a></p>
+<p id="section-10-3">MP_PROTOCOL_VIOLATION (experiments use 0xba01): An endpoint detected an error with protocol compliance 
+that was not covered by more specific error codes.<a href="#section-10-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana-considerations">
-<section id="section-10">
+<section id="section-11">
       <h2 id="name-iana-considerations">
-<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-10-1">This document defines a new transport parameter for the negotiation of enable multiple paths for QUIC,
+<p id="section-11-1">This document defines a new transport parameter for the negotiation of enable multiple paths for QUIC,
 and two new frame types. The draft defines provisional values for experiments, but we expect IANA to
-allocate short values if the draft is approved.<a href="#section-10-1" class="pilcrow">¶</a></p>
-<p id="section-10-2">The following entry in <a href="#transport-parameters" class="xref">Table 2</a> should be added to the "QUIC Transport Parameters" registry
-under the "QUIC Protocol" heading.<a href="#section-10-2" class="pilcrow">¶</a></p>
+allocate short values if the draft is approved.<a href="#section-11-1" class="pilcrow">¶</a></p>
+<p id="section-11-2">The following entry in <a href="#transport-parameters" class="xref">Table 2</a> should be added to the "QUIC Transport Parameters" registry
+under the "QUIC Protocol" heading.<a href="#section-11-2" class="pilcrow">¶</a></p>
 <span id="name-addition-to-quic-transport-"></span><div id="transport-parameters">
 <table class="center" id="table-2">
         <caption>
@@ -2045,8 +2060,8 @@ under the "QUIC Protocol" heading.<a href="#section-10-2" class="pilcrow">¶</a>
         </tbody>
       </table>
 </div>
-<p id="section-10-4">The following frame types defined in <a href="#frame-types" class="xref">Table 3</a> should be added to the "QUIC Frame Types" registry
-under the "QUIC Protocol" heading.<a href="#section-10-4" class="pilcrow">¶</a></p>
+<p id="section-11-4">The following frame types defined in <a href="#frame-types" class="xref">Table 3</a> should be added to the "QUIC Frame Types" registry
+under the "QUIC Protocol" heading.<a href="#section-11-4" class="pilcrow">¶</a></p>
 <span id="name-addition-to-quic-frame-type"></span><div id="frame-types">
 <table class="center" id="table-3">
         <caption>
@@ -2078,46 +2093,74 @@ under the "QUIC Protocol" heading.<a href="#section-10-4" class="pilcrow">¶</a>
         </tbody>
       </table>
 </div>
+<p id="section-11-6">The following transport error code defined in <a href="#tab-error-code" class="xref">Table 4</a> should be added to the "QUIC Transport Error Codes" 
+registry under the "QUIC Protocol" heading.<a href="#section-11-6" class="pilcrow">¶</a></p>
+<span id="name-error-code-for-multi-path-q"></span><div id="tab-error-code">
+<table class="center" id="table-4">
+        <caption>
+<a href="#table-4" class="selfRef">Table 4</a>:
+<a href="#name-error-code-for-multi-path-q" class="selfRef">Error Code for Multi-path QUIC</a>
+        </caption>
+<thead>
+          <tr>
+            <th class="text-left" rowspan="1" colspan="1">Value</th>
+            <th class="text-left" rowspan="1" colspan="1">Code</th>
+            <th class="text-left" rowspan="1" colspan="1">Description</th>
+            <th class="text-left" rowspan="1" colspan="1">Specification</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">TBD (experiments use 0xba01)</td>
+            <td class="text-left" rowspan="1" colspan="1">MP_PROTOCOL_VIOLATION</td>
+            <td class="text-left" rowspan="1" colspan="1">Multi-path protocol violation</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <a href="#error-codes" class="xref">Section 10</a>
+</td>
+          </tr>
+        </tbody>
+      </table>
+</div>
 </section>
 </div>
 <div id="security-considerations">
-<section id="section-11">
+<section id="section-12">
       <h2 id="name-security-considerations">
-<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-11-1">TBD<a href="#section-11-1" class="pilcrow">¶</a></p>
+<p id="section-12-1">TBD<a href="#section-12-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="contributors">
-<section id="section-12">
+<section id="section-13">
       <h2 id="name-contributors">
-<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-contributors" class="section-name selfRef">Contributors</a>
+<a href="#section-13" class="section-number selfRef">13. </a><a href="#name-contributors" class="section-name selfRef">Contributors</a>
       </h2>
-<p id="section-12-1">This document is a collaboration of authors that combines work from three proposals.
-Further contributors that were also involved one of the original proposals are:<a href="#section-12-1" class="pilcrow">¶</a></p>
+<p id="section-13-1">This document is a collaboration of authors that combines work from three proposals.
+Further contributors that were also involved one of the original proposals are:<a href="#section-13-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-12-2.1">Qing An<a href="#section-12-2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-13-2.1">Qing An<a href="#section-13-2.1" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-12-2.2">Zhenyu Li<a href="#section-12-2.2" class="pilcrow">¶</a>
+        <li class="normal" id="section-13-2.2">Zhenyu Li<a href="#section-13-2.2" class="pilcrow">¶</a>
 </li>
       </ul>
 </section>
 </div>
 <div id="acknowledgments">
-<section id="section-13">
+<section id="section-14">
       <h2 id="name-acknowledgments">
-<a href="#section-13" class="section-number selfRef">13. </a><a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+<a href="#section-14" class="section-number selfRef">14. </a><a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="section-13-1">TBD<a href="#section-13-1" class="pilcrow">¶</a></p>
+<p id="section-14-1">TBD<a href="#section-14-1" class="pilcrow">¶</a></p>
 </section>
 </div>
-<section id="section-14">
+<section id="section-15">
       <h2 id="name-references">
-<a href="#section-14" class="section-number selfRef">14. </a><a href="#name-references" class="section-name selfRef">References</a>
+<a href="#section-15" class="section-number selfRef">15. </a><a href="#name-references" class="section-name selfRef">References</a>
       </h2>
-<section id="section-14.1">
+<section id="section-15.1">
         <h3 id="name-normative-references">
-<a href="#section-14.1" class="section-number selfRef">14.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+<a href="#section-15.1" class="section-number selfRef">15.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
         </h3>
 <dl class="references">
 <dt id="QUIC-TLS">[QUIC-TLS]</dt>
@@ -2142,9 +2185,9 @@ Further contributors that were also involved one of the original proposals are:<
 <dd class="break"></dd>
 </dl>
 </section>
-<section id="section-14.2">
+<section id="section-15.2">
         <h3 id="name-informative-references">
-<a href="#section-14.2" class="section-number selfRef">14.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+<a href="#section-15.2" class="section-number selfRef">15.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
 <dt id="I-D.bonaventure-iccrg-schedulers">[I-D.bonaventure-iccrg-schedulers]</dt>

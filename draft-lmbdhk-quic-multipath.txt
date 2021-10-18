@@ -95,13 +95,14 @@ Table of Contents
    9.  New Frames
      9.1.  PATH_ABANDON Frame
      9.2.  ACK_MP Frame
-   10. IANA Considerations
-   11. Security Considerations
-   12. Contributors
-   13. Acknowledgments
-   14. References
-     14.1.  Normative References
-     14.2.  Informative References
+   10. Error Codes
+   11. IANA Considerations
+   12. Security Considerations
+   13. Contributors
+   14. Acknowledgments
+   15. References
+     15.1.  Normative References
+     15.2.  Informative References
    Authors' Addresses
 
 1.  Introduction
@@ -828,9 +829,22 @@ Table of Contents
    it SHOULD use Packet Number Space Identifier 0 in ACK_MP frames.  If
    an endpoint receives a ACK_MP frame with a non-existing packet number
    space ID, it MUST treat this as a connection error of type
-   MP_CONNECTION_ERROR and close the connection.
+   MP_PROTOCOL_VIOLATION and close the connection.
 
-10.  IANA Considerations
+10.  Error Codes
+
+   Multi-path QUIC transport error codes are 62-bit unsigned integers
+   following [QUIC-TRANSPORT].
+
+   This section lists the defined Multi-path QUIC transport error codes
+   that can be used in a CONNECTION_CLOSE frame with a type of 0x1c.
+   These errors apply to the entire connection.
+
+   MP_PROTOCOL_VIOLATION (experiments use 0xba01): An endpoint detected
+   an error with protocol compliance that was not covered by more
+   specific error codes.
+
+11.  IANA Considerations
 
    This document defines a new transport parameter for the negotiation
    of enable multiple paths for QUIC, and two new frame types.  The
@@ -863,11 +877,25 @@ Table of Contents
 
                Table 3: Addition to QUIC Frame Types Entries
 
-11.  Security Considerations
+   The following transport error code defined in Table 4 should be added
+   to the "QUIC Transport Error Codes" registry under the "QUIC
+   Protocol" heading.
+
+   +==============+=======================+============+===============+
+   | Value        | Code                  |Description | Specification |
+   +==============+=======================+============+===============+
+   | TBD          | MP_PROTOCOL_VIOLATION |Multi-path  | Section 10    |
+   | (experiments |                       |protocol    |               |
+   | use 0xba01)  |                       |violation   |               |
+   +--------------+-----------------------+------------+---------------+
+
+                  Table 4: Error Code for Multi-path QUIC
+
+12.  Security Considerations
 
    TBD
 
-12.  Contributors
+13.  Contributors
 
    This document is a collaboration of authors that combines work from
    three proposals.  Further contributors that were also involved one of
@@ -877,13 +905,13 @@ Table of Contents
 
    *  Zhenyu Li
 
-13.  Acknowledgments
+14.  Acknowledgments
 
    TBD
 
-14.  References
+15.  References
 
-14.1.  Normative References
+15.1.  Normative References
 
    [QUIC-TLS] Thomson, M., Ed. and S. Turner, Ed., "Using TLS to Secure
               QUIC", RFC 9001, DOI 10.17487/RFC9001, May 2021,
@@ -908,7 +936,7 @@ Table of Contents
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://datatracker.ietf.org/doc/html/rfc8174>.
 
-14.2.  Informative References
+15.2.  Informative References
 
    [I-D.bonaventure-iccrg-schedulers]
               Bonaventure, O., Piraux, M., Coninck, Q. D., Baerts, M.,
