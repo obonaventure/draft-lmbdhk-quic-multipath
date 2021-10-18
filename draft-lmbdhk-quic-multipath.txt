@@ -5,14 +5,14 @@
 QUIC Working Group                                                Y. Liu
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 19 April 2022                                     Q. De Coninck
+Expires: 21 April 2022                                     Q. De Coninck
                                                           O. Bonaventure
                                                                UCLouvain
                                                               C. Huitema
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                         16 October 2021
+                                                         18 October 2021
 
 
                       Multipath Extension for QUIC
@@ -50,7 +50,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 19 April 2022.
+   This Internet-Draft will expire on 21 April 2022.
 
 Copyright Notice
 
@@ -212,15 +212,35 @@ Table of Contents
 
    *  name: enable_multipath (TBD - experiments use 0xbaba)
 
-   *  value: 0 (default) for disabled, 1 for multipath support with
-      multiple packet number spaces, 2 for multipath support with one
-      packet number space (this is compatible with
-      [I-D.liu-multipath-quic])
+   *  value: 0 (default) for disabled.  Endpoints use 2-bits in the
+      value field for negotiating one or more PN spaces, available
+      option value for client and server are listed in Table 1 :
+
+      +===============+===========================+================+
+      | Client Option | Definition                | Allowed server |
+      |               |                           | responses      |
+      +===============+===========================+================+
+      | 0x0           | don't support multi-path  | 0x0            |
+      +---------------+---------------------------+----------------+
+      | 0x1           | only support one PN space | 0x0 or 0x1     |
+      |               | for multi-path            |                |
+      +---------------+---------------------------+----------------+
+      | 0x2           | only support multiple PN  | 0x0 or 0x2     |
+      |               | spaces for multi-path     |                |
+      +---------------+---------------------------+----------------+
+      | 0x3           | support both one PN space | 0x0, 0x1 or    |
+      |               | and multiple PN space     | 0x2            |
+      +---------------+---------------------------+----------------+
+
+              Table 1: Available value for enable_multipath
 
    If the peer does not carry the enable_multipath transport parameter,
    which means the peer does not support multipath, endpoint MUST
    fallback to [QUIC-TRANSPORT] with single path and MUST NOT use any
-   frame or mechanism defined in this document.
+   frame or mechanism defined in this document.  If endpoint receives
+   unexpected value for the transport parameter "enable_multipath", it
+   MUST treat this as a connection error of type MP_CONNECTION_ERROR and
+   close the connection.
 
    Note that the transport parameter "active_connection_id_limit"
    [QUIC-TRANSPORT] limits the number of usable Connection IDs, and also
@@ -817,7 +837,7 @@ Table of Contents
    draft defines provisional values for experiments, but we expect IANA
    to allocate short values if the draft is approved.
 
-   The following entry in Table 1 should be added to the "QUIC Transport
+   The following entry in Table 2 should be added to the "QUIC Transport
    Parameters" registry under the "QUIC Protocol" heading.
 
     +==============================+==================+===============+
@@ -826,9 +846,9 @@ Table of Contents
     | TBD (experiments use 0xbaba) | enable_multipath | Section 2     |
     +------------------------------+------------------+---------------+
 
-           Table 1: Addition to QUIC Transport Parameters Entries
+           Table 2: Addition to QUIC Transport Parameters Entries
 
-   The following frame types defined in Table 2 should be added to the
+   The following frame types defined in Table 3 should be added to the
    "QUIC Frame Types" registry under the "QUIC Protocol" heading.
 
       +==============================+==============+===============+
@@ -841,7 +861,7 @@ Table of Contents
       | 0xbaba05)                    |              |               |
       +------------------------------+--------------+---------------+
 
-               Table 2: Addition to QUIC Frame Types Entries
+               Table 3: Addition to QUIC Frame Types Entries
 
 11.  Security Considerations
 

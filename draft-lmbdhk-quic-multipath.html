@@ -1026,7 +1026,7 @@ address div.right {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Liu, et al.</td>
-<td class="center">Expires 19 April 2022</td>
+<td class="center">Expires 21 April 2022</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1039,12 +1039,12 @@ address div.right {
 <dd class="internet-draft">draft-lmbdhk-quic-multipath-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2021-10-16" class="published">16 October 2021</time>
+<time datetime="2021-10-18" class="published">18 October 2021</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-04-19">19 April 2022</time></dd>
+<dd class="expires"><time datetime="2022-04-21">21 April 2022</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1110,7 +1110,7 @@ address div.right {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 19 April 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 21 April 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1342,12 +1342,54 @@ defined as follow:<a href="#section-2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-2-2.1">name: enable_multipath (TBD - experiments use 0xbaba)<a href="#section-2-2.1" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-2-2.2">value: 0 (default) for disabled, 1 for multipath support with multiple packet number spaces, 2 for multipath support with one packet number space (this is compatible with <span>[<a href="#I-D.liu-multipath-quic" class="xref">I-D.liu-multipath-quic</a>]</span>)<a href="#section-2-2.2" class="pilcrow">¶</a>
+        <li class="normal" id="section-2-2.2">value: 0 (default) for disabled. Endpoints use 2-bits in the value field for negotiating one or more 
+PN spaces, available option value for client and server are listed in <a href="#param_value_definition" class="xref">Table 1</a> :<a href="#section-2-2.2" class="pilcrow">¶</a>
 </li>
       </ul>
-<p id="section-2-3">If the peer does not carry the enable_multipath transport parameter, which means the peer does not support multipath, endpoint MUST fallback to <span>[<a href="#QUIC-TRANSPORT" class="xref">QUIC-TRANSPORT</a>]</span> with single path and MUST NOT use any frame or mechanism defined in this document.<a href="#section-2-3" class="pilcrow">¶</a></p>
-<p id="section-2-4">Note that the transport parameter "active_connection_id_limit" <span>[<a href="#QUIC-TRANSPORT" class="xref">QUIC-TRANSPORT</a>]</span> limits the number of usable
-Connection IDs, and also limits the number of concurrent paths. For the QUIC multipath extension this limit even applies when no connection ID is exposed in the QUIC header.<a href="#section-2-4" class="pilcrow">¶</a></p>
+<span id="name-available-value-for-enable_"></span><div id="param_value_definition">
+<table class="center" id="table-1">
+        <caption>
+<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#name-available-value-for-enable_" class="selfRef">Available value for enable_multipath</a>
+        </caption>
+<thead>
+          <tr>
+            <th class="text-left" rowspan="1" colspan="1">Client Option</th>
+            <th class="text-left" rowspan="1" colspan="1">Definition</th>
+            <th class="text-left" rowspan="1" colspan="1">Allowed server responses</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">0x0</td>
+            <td class="text-left" rowspan="1" colspan="1">don't support multi-path</td>
+            <td class="text-left" rowspan="1" colspan="1">0x0</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">0x1</td>
+            <td class="text-left" rowspan="1" colspan="1">only support one PN space for multi-path</td>
+            <td class="text-left" rowspan="1" colspan="1">0x0 or 0x1</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">0x2</td>
+            <td class="text-left" rowspan="1" colspan="1">only support multiple PN spaces for multi-path</td>
+            <td class="text-left" rowspan="1" colspan="1">0x0 or 0x2</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">0x3</td>
+            <td class="text-left" rowspan="1" colspan="1">support both one PN space and multiple PN space</td>
+            <td class="text-left" rowspan="1" colspan="1">0x0, 0x1 or 0x2</td>
+          </tr>
+        </tbody>
+      </table>
+</div>
+<p id="section-2-4">If the peer does not carry the enable_multipath transport parameter, which means the peer does not 
+support multipath, endpoint MUST fallback to <span>[<a href="#QUIC-TRANSPORT" class="xref">QUIC-TRANSPORT</a>]</span> with single path and MUST NOT use 
+any frame or mechanism defined in this document. If endpoint receives unexpected value for the transport parameter 
+"enable_multipath", it MUST treat this as a connection error of type MP_CONNECTION_ERROR 
+and close the connection.<a href="#section-2-4" class="pilcrow">¶</a></p>
+<p id="section-2-5">Note that the transport parameter "active_connection_id_limit" <span>[<a href="#QUIC-TRANSPORT" class="xref">QUIC-TRANSPORT</a>]</span> limits the number of usable
+Connection IDs, and also limits the number of concurrent paths. For the QUIC multipath extension this limit even applies when no connection ID is exposed in the QUIC header.<a href="#section-2-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="path-setup-and-removal">
@@ -1977,12 +2019,12 @@ as a connection error of type MP_CONNECTION_ERROR and close the connection.<a hr
 <p id="section-10-1">This document defines a new transport parameter for the negotiation of enable multiple paths for QUIC,
 and two new frame types. The draft defines provisional values for experiments, but we expect IANA to
 allocate short values if the draft is approved.<a href="#section-10-1" class="pilcrow">¶</a></p>
-<p id="section-10-2">The following entry in <a href="#transport-parameters" class="xref">Table 1</a> should be added to the "QUIC Transport Parameters" registry
+<p id="section-10-2">The following entry in <a href="#transport-parameters" class="xref">Table 2</a> should be added to the "QUIC Transport Parameters" registry
 under the "QUIC Protocol" heading.<a href="#section-10-2" class="pilcrow">¶</a></p>
 <span id="name-addition-to-quic-transport-"></span><div id="transport-parameters">
-<table class="center" id="table-1">
+<table class="center" id="table-2">
         <caption>
-<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#table-2" class="selfRef">Table 2</a>:
 <a href="#name-addition-to-quic-transport-" class="selfRef">Addition to QUIC Transport Parameters Entries</a>
         </caption>
 <thead>
@@ -2003,12 +2045,12 @@ under the "QUIC Protocol" heading.<a href="#section-10-2" class="pilcrow">¶</a>
         </tbody>
       </table>
 </div>
-<p id="section-10-4">The following frame types defined in <a href="#frame-types" class="xref">Table 2</a> should be added to the "QUIC Frame Types" registry
+<p id="section-10-4">The following frame types defined in <a href="#frame-types" class="xref">Table 3</a> should be added to the "QUIC Frame Types" registry
 under the "QUIC Protocol" heading.<a href="#section-10-4" class="pilcrow">¶</a></p>
 <span id="name-addition-to-quic-frame-type"></span><div id="frame-types">
-<table class="center" id="table-2">
+<table class="center" id="table-3">
         <caption>
-<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#table-3" class="selfRef">Table 3</a>:
 <a href="#name-addition-to-quic-frame-type" class="selfRef">Addition to QUIC Frame Types Entries</a>
         </caption>
 <thead>
