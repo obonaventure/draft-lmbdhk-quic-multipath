@@ -5,14 +5,14 @@
 QUIC Working Group                                                Y. Liu
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 21 April 2022                                     Q. De Coninck
+Expires: 22 April 2022                                     Q. De Coninck
                                                           O. Bonaventure
                                                                UCLouvain
                                                               C. Huitema
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                         18 October 2021
+                                                         19 October 2021
 
 
                       Multipath Extension for QUIC
@@ -50,7 +50,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 April 2022.
+   This Internet-Draft will expire on 22 April 2022.
 
 Copyright Notice
 
