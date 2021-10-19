@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-10-17T00:30:23.635674+00:00",
+  "timestamp": "2021-10-19T00:30:52.005439+00:00",
   "repo": "mirjak/draft-lmbdhk-quic-multipath",
   "labels": [
     {
@@ -62,7 +62,7 @@
       "labels": [],
       "body": "There is one part I am afraid people might feel a little bit hard to follow: the three types of path identifiers in the PATH_STATUS frame. Those three types of path identifiers were introduced in order to be compatible with zero-length CID use cases, so I think we might need two additional example figures (like figure 3 in the current draft), one for (non-zero length CID, zero-length CID) and the other one for (zero-length CID & zero-length CID). Do you think that is a good idea? I can work on those figures if it doesn't complicate the flow of the draft.",
       "createdAt": "2021-10-15T05:54:13Z",
-      "updatedAt": "2021-10-15T19:55:44Z",
+      "updatedAt": "2021-10-18T01:51:53Z",
       "closedAt": null,
       "comments": [
         {
@@ -78,6 +78,41 @@
           "body": "Yes, please create a PR!",
           "createdAt": "2021-10-15T19:55:43Z",
           "updatedAt": "2021-10-15T19:55:43Z"
+        },
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@huitema I am editing the path closing figures with zero-length CID and single PN. Is it similar to what you have in mind?\r\n\r\n~~~\r\n  Client                                                      Server\r\n\r\n  (client tells server to abandon a path)\r\n  1-RTT[X]: DCID=S2 PATH_ABANDON[path_id_type=1, path_id=2]->\r\n                             (server tells client to abandon a path)\r\n                <-1-RTT[Y]: PATH_ABANDON[path_id_type=0, path_id=2],\r\n                                                 ACK_MP[Seq=0, PN=X]\r\n  (client abandons the path that it is using)\r\n  1-RTT[X+1]: DCID=S3 RETIRE_CONNECTION_ID[2],\r\n                            ACK_MP[Seq=0, PN=Y]->\r\n                                 <-1-RTT[Y+1]: ACK_MP[Seq=0, PN=X+1]\r\n  (client waits for idle timeout to release resources)\r\n\r\n~~~\r\n{: #fig-example-path-close2 title=\"Example of closing a path when the server chooses to use zero-length CID\"}\r\n\r\n~~~\r\n  Client                                                     Server\r\n\r\n  (client tells server to abandon a path)\r\n  1-RTT[X]: DCID=S2 PATH_ABANDON[path_id_type=2]->\r\n                            (server tells client to abandon a path)\r\n                          <-1-RTT[Y]: PATH_ABANDON[path_id_type=2],\r\n                                                ACK_MP[Seq=0, PN=X]\r\n  1-RTT[X+1]: ACK_MP[Seq=0, PN=Y]->\r\n  (client waits for idle timeout to release resources)\r\n               (server waits for idle timeout to release resources)\r\n\r\n~~~\r\n{: #fig-example-path-close3 title=\"Example of closing a path when the both client and server choose to use zero-length CIDs.\"}",
+          "createdAt": "2021-10-17T01:46:28Z",
+          "updatedAt": "2021-10-17T01:46:28Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "COLLABORATOR",
+          "body": "In the case of single number space, we use ACK, not ACK_MP.  But in fact you do not need to draw the ACKs there, there is no special processing of ACKs required. Also, there is no need to wait for an idle timeout, which typically is 10 to 30 seconds. That's too large. \r\n\r\nDo we really need to send \"abandon path\" in both directions? If I think about it, the real concern is that client will send a PATH_ABANDON message, but some time later, due to differences in delay, etc., the server receive data on the same four tuples.\r\nHow does the server know whether it should create a new path or not?\r\n\r\nIn the single space case, the logical test may be to check the sequence numbers of the packet. If the sequence number of the new packet is greater than that of the path_abandon, then the client is reactivating a path that was abandoned previously. Maybe the client connected again to the same network, after some disconnected interval. The server can start sending on the reactivated path. If the packet number is lower than that of the path abandon, then the server should not reactivate the path.\r\n\r\nIn the multiple space case, if the CID is defined, there is no ambiguity.",
+          "createdAt": "2021-10-17T02:28:23Z",
+          "updatedAt": "2021-10-17T02:28:23Z"
+        },
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> In the case of single number space, we use ACK, not ACK_MP. But in fact you do not need to draw the ACKs there, there is no special processing of ACKs required. Also, there is no need to wait for an idle timeout, which typically is 10 to 30 seconds. That's too large.\r\n\r\nACK works for me. I think we might also want to add a sentence in the Sec. of \"one packet number space\" explicitly specifying that \"for single PN, use ACK instead of ACK_MP\", and change some texts in the ACK_MP frame section that is related to zero-length CID (the current draft says \"if the endpoint receives 1-RTT packets with 0-length Connection ID, it SHOULD use Packet Number Space Identifier 0 in ACK_MP frames\". ).\r\n\r\n> \r\n> Do we really need to send \"abandon path\" in both directions? If I think about it, the real concern is that client will send a PATH_ABANDON message, but some time later, due to differences in delay, etc., the server receive data on the same four tuples. How does the server know whether it should create a new path or not?\r\n\r\nI think in single PN, sending \"abandon path\" in both directions is helpful. When the client sends \"PATH_ABANDON\", it promises not to send non-probing packets in the current activity cycle. It could send probing packets to reactivate the path a moment later if the client thinks the network environment has changed. After sending out \"PATH_ABANDON\", the client should still be able to receive packets from the server for a while on that path because there may be the server's inflight packets on that path. It was not until the client sees the server's \"PATH_ABANDON\", the client then knows that no more server's data is to be expected except for some out-of-order packets. So after receiving \"PATH_ABANDON\", the endpoint can start preparing to free memories and clear path stats allocated for that path. The time interval from seeing \"PATH_ABANDON\" to actually releasing relevant resources is going to be an important parameter, and yes, 10-30 seconds is too long. What would be a more appropriate number for this interval? \r\n\r\n> \r\n> In the single space case, the logical test may be to check the sequence numbers of the packet. If the sequence number of the new packet is greater than that of the path_abandon, then the client is reactivating a path that was abandoned previously. Maybe the client connected again to the same network, after some disconnected interval. The server can start sending on the reactivated path. If the packet number is lower than that of the path abandon, then the server should not reactivate the path.\r\n\r\nDoes it imply that we need to track the packet number of the PATH_ABANDON for a path that is closed? When a path is in a closed state, the server may reject any newly received packets unless it is a probing packet (back to our path initialization process). In this way, it should be OK to forget any info related to that path in the last activity cycle.\r\n\r\n> \r\n> In the multiple space case, if the CID is defined, there is no ambiguity.\r\n\r\n",
+          "createdAt": "2021-10-17T04:46:07Z",
+          "updatedAt": "2021-10-17T04:46:07Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "COLLABORATOR",
+          "body": "In most similar situations, RFC 9000 uses a delay of 3xRTO.\r\n\r\nNote that in the \"simple\" case, the client can receive packets from the server on any tuple. There are no resource allocated per path for receiving packets. There will be local resource allocated for sending packets, congestion context for example. But not on for receiving: all packets can be decrypted and processed. If the client knows that it will not send, it can discard the resource allocated for sending without risking a side effect.",
+          "createdAt": "2021-10-17T05:46:07Z",
+          "updatedAt": "2021-10-17T05:46:07Z"
+        },
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I changed the timeout to 3RTO. As the problem is similar to FIN-ACK&FIN-ACK when TCP closes, I kept the ACK in the graph (because the path_id_type=2 refers to the path where the packet is traveling, we want to make sure it is acked before we close the path.). Regarding the resource, I think if we keep a unified receive record, which is not per-path, yes, we can discard the sending resources. But if we have some path stats (e.g. how many packets received in total in this current activity cycle), we need to keep these data structures until we are sure that the peer is not going to send more packets on that path. Indeed, it depends on the implementation, but I feel it is generally helpful to have PATH_ABANDON sent in both directions. What do you think?\r\n\r\n~~~\r\n  Client                                                      Server\r\n\r\n  (client tells server to abandon a path)\r\n  1-RTT[X]: DCID=S2 PATH_ABANDON[path_id_type=1, path_id=2]->\r\n                             (server tells client to abandon a path)\r\n                <-1-RTT[Y]: PATH_ABANDON[path_id_type=0, path_id=2],\r\n                                                           ACK[PN=X]\r\n  (client abandons the path that it is using\r\n  and waits for 3*RTO to close the path)\r\n  1-RTT[X+1]: DCID=S3 RETIRE_CONNECTION_ID[2],\r\n                                     ACK[PN=Y]->\r\n                                            (server closes the path)\r\n\r\n~~~\r\n{: #fig-example-path-close2 title=\"Example of closing a path when the server chooses to use zero-length CID\"}\r\n\r\n~~~\r\n  Client                                                     Server\r\n\r\n  (client tells server to abandon a path)\r\n  1-RTT[X]: DCID=S2 PATH_ABANDON[path_id_type=2]->\r\n                            (server tells client to abandon a path)\r\n                          <-1-RTT[Y]: PATH_ABANDON[path_id_type=2],\r\n                                                          ACK[PN=X]\r\n  (client waits for 3*RTO to close the path)\r\n  1-RTT[X+1]: ACK[PN=Y]->\r\n                         (server waits for 3*RTO to close the path)\r\n\r\n~~~\r\n{: #fig-example-path-close3 title=\"Example of closing a path when both client and server choose to use zero-length CIDs.\"}",
+          "createdAt": "2021-10-18T01:51:53Z",
+          "updatedAt": "2021-10-18T01:51:53Z"
         }
       ]
     },
@@ -204,7 +239,7 @@
       "labels": [],
       "body": "I took the following text from draft-liu:\r\n\r\n`Note: Even if use of multiple packet number spaces is negotiated but a peer uses an zero length connection ID, then all packets sent to that peer MUST be numbered in a single number space (as specified in the previous section), because the packet level decryption implementation will only see one Connection ID sequence number (the default number 0).`\r\n\r\nThis basically makes the one packet number handling mandatory to implement as you also need it if multiple packet number spaces were negotiated but zero length CID is used.\r\n\r\nThe alternative would be to say that you can't used zero length CID if multiple packet number spaces are negotiated.\r\n\r\nAlso I'm currently proposing  enable_multipath=1 for multiple number space and enable_multipath=2 for one number space to be compatible with the draft-liu and the alibaba implementation. However if we think one packet number space is mandatory to implement, it would make more sense to have it the other way around and allow fallback to one packet number space, namely if the client ask for two packet number spaces but the server supports only one but would also lead to a successful negotiation.\r\n\r\nWhat do people think about this?",
       "createdAt": "2021-10-15T07:54:04Z",
-      "updatedAt": "2021-10-16T10:59:39Z",
+      "updatedAt": "2021-10-18T12:16:56Z",
       "closedAt": null,
       "comments": [
         {
@@ -241,6 +276,20 @@
           "body": "Agree with Christian's design for value definitions.\r\nSubmitted PR #20 for this issue.",
           "createdAt": "2021-10-16T10:59:39Z",
           "updatedAt": "2021-10-16T10:59:39Z"
+        },
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "COLLABORATOR",
+          "body": "As #20 got merged, I think this is now resolved.",
+          "createdAt": "2021-10-18T09:30:20Z",
+          "updatedAt": "2021-10-18T09:30:20Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "body": "Actually I think this is not fully resolved. The initial question was about use of multiple packet number spaces and zero length connection ID.\r\n\r\nDo we now say that if multiple packet number spaces are used, zero connection ID cannot be used? If yes, that means we need to remove the text I've cited in the initial issue description from the draft. And also add some text that \"zero-length CID MUST not be used with enable_multipath=2\".\r\n\r\nOr if we want to keep that option that basically means that you need to always implement also singe packet number handling even if use of multiple packet number spaces is negotiated, and then we should say that more explicitly in the negotiation section.\r\n\r\nTo me it's not fully clear which option you have agreed to now...?",
+          "createdAt": "2021-10-18T12:16:56Z",
+          "updatedAt": "2021-10-18T12:16:56Z"
         }
       ]
     },
@@ -280,15 +329,15 @@
       "id": "I_kwDOGNtpaM49Ou03",
       "title": "ACK_MP and single packet number space",
       "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/issues/8",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "qdeconinck",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "When negotiating the use of a single packet number space, it is not clear whether the use of ACK_MP frame is acceptable or not. Should we only stick to ACK frames and consider reception of ACK_MP frames to be MP_PROTOCOL_VIOLATION error? Or should we tolerate their reception if the packet number space identifier is 0?",
       "createdAt": "2021-10-15T09:46:01Z",
-      "updatedAt": "2021-10-15T10:18:47Z",
-      "closedAt": null,
+      "updatedAt": "2021-10-18T17:26:24Z",
+      "closedAt": "2021-10-18T17:26:24Z",
       "comments": [
         {
           "author": "mirjak",
@@ -383,22 +432,22 @@
       "id": "I_kwDOGNtpaM49QnO1",
       "title": "add MP_CONNECTION_ERROR to IANA section",
       "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/issues/15",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mirjak",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "If we want an MP specific error type we need to also add this to the IANA section.",
       "createdAt": "2021-10-15T19:58:26Z",
-      "updatedAt": "2021-10-16T11:48:17Z",
-      "closedAt": null,
+      "updatedAt": "2021-10-18T07:32:20Z",
+      "closedAt": "2021-10-18T07:32:20Z",
       "comments": [
         {
           "author": "Yanmei-Liu",
           "authorAssociation": "COLLABORATOR",
-          "body": "Submitted PR #21 for this issue.\r\nI just added MP_PROTOCOL_VIOLATION for connection close. If we have more specific error codes in the future, we could add them in the table.",
+          "body": "Submitted PR #21 for this issue.\r\nI just added MP_PROTOCOL_VIOLATION for connection close. If we have more specific error codes in the future, we can add them in the table.",
           "createdAt": "2021-10-16T11:48:17Z",
-          "updatedAt": "2021-10-16T11:48:17Z"
+          "updatedAt": "2021-10-18T04:44:15Z"
         }
       ]
     },
@@ -425,6 +474,77 @@
           "updatedAt": "2021-10-16T22:50:00Z"
         }
       ]
+    },
+    {
+      "number": 22,
+      "id": "I_kwDOGNtpaM49UY5P",
+      "title": "Are we sure we really don't need stand-by?",
+      "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/issues/22",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "I believe stand-by (or backup) has been useful in MPTCP. This is not really about scheduling because all it says is: I won't use this path actively(yet)  but please leave it open.",
+      "createdAt": "2021-10-18T07:56:55Z",
+      "updatedAt": "2021-10-18T09:34:28Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "COLLABORATOR",
+          "body": "IMHO, this is a (simple) form of path prioritization. I'm not sure it should be part of the current. We could delegate this point to an \"advanced\" path management draft.",
+          "createdAt": "2021-10-18T09:34:28Z",
+          "updatedAt": "2021-10-18T09:34:28Z"
+        }
+      ]
+    },
+    {
+      "number": 25,
+      "id": "I_kwDOGNtpaM49WqUt",
+      "title": "Take Hardware Offloads into Account",
+      "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/issues/25",
+      "state": "OPEN",
+      "author": "nibanks",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "While discussing single packet space vs multi packet space designs, @martinduke brought up the topic of hardware offloading. The effect of any design changes on packet encryption/decryption should take HW offloads into account. As I understand it, single packet space would not modify the packet encryption/decryption logic, but the multi packet space design would because of the difference nonce length. Additionally, since multi-path would be a negotiated feature/extension, that would mean all connections that don't negotiate the feature would have the \"old\" model/logic, where as the connections that do would have the new encryption/decryption logic. IMO, this could significantly complicated HW offloads.",
+      "createdAt": "2021-10-18T16:38:38Z",
+      "updatedAt": "2021-10-18T17:38:49Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "martinduke",
+          "authorAssociation": "NONE",
+          "body": "A few disconnected points on this subject:\r\n- based on my (limited) engagement with hardware people, no one has cut any silicon for these workloads, so there is time to make changes\r\n- we don't know what the hardware APIs will look like, and if the multi-space design will conflict with them\r\n\r\non the other hand:\r\n- if there turned out to be a conflict, that would be very bad for the future of multipath\r\n- it is unclear if multipath, given its current status, likely status in the near future, and addressable market, would move the needle for vendors\r\n- creating the impression that the QUIC crypto API is not stable is bad for QUIC\r\n\r\nIt would be very good to engage with the right people in industry, do some thinking about what these APIs would likely resemble, and if possible come up with a crypto design that is consistent with that.",
+          "createdAt": "2021-10-18T17:15:01Z",
+          "updatedAt": "2021-10-18T17:15:01Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "body": "I would be hoping that any hardware offload would already be able to handle a different nonce length as that seem more future proof anyway. However, Martin probably has a good point that is makes sense to reach out and make this requirement explicit now.",
+          "createdAt": "2021-10-18T17:38:49Z",
+          "updatedAt": "2021-10-18T17:38:49Z"
+        }
+      ]
+    },
+    {
+      "number": 26,
+      "id": "I_kwDOGNtpaM49W2VG",
+      "title": "More text on packet number space options",
+      "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/issues/26",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Based on the discussed from the side meeting, we need to\r\n\r\n- Clarify that the goal is to only select one approach for the finally published solution in an RFC\r\n- Add some discussion about the pros and cons to the appendix",
+      "createdAt": "2021-10-18T17:28:52Z",
+      "updatedAt": "2021-10-18T17:28:52Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -771,7 +891,7 @@
       "labels": [],
       "body": "There is a SHOULD here, which I believe should be a MUST as we taking about the receiver behaviour here.",
       "createdAt": "2021-10-15T20:18:48Z",
-      "updatedAt": "2021-10-16T11:12:09Z",
+      "updatedAt": "2021-10-18T07:51:54Z",
       "baseRepository": "mirjak/draft-lmbdhk-quic-multipath",
       "baseRefName": "master",
       "baseRefOid": "b6331e57d7373526cc4af756386473ca16ece41a",
@@ -821,6 +941,26 @@
               "body": "Yes, we need to handle NAT rebinding cases when the 1-RTT packets are sent with different 4-tuples and the same CID, so I prefer SHOULD here.",
               "createdAt": "2021-10-16T11:12:09Z",
               "updatedAt": "2021-10-16T11:12:09Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4ul8ao",
+          "commit": {
+            "abbreviatedOid": "edbfa5c"
+          },
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-18T07:51:53Z",
+          "updatedAt": "2021-10-18T07:51:54Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "Yes, the rebinding case is considered here. The text says that the sender must change the CID when you move to a new path, however, the receiver should not expect to always see a new CID if the address changes (because of NAT rebinding). This MUST is only for the receiver. ",
+              "createdAt": "2021-10-18T07:51:53Z",
+              "updatedAt": "2021-10-18T07:51:54Z"
             }
           ]
         }
@@ -893,7 +1033,7 @@
       "labels": [],
       "body": "Simplify path_status frame with path_abandon frame following the discussion on issue#2. Error code and Reason Phrase are left TBD.",
       "createdAt": "2021-10-15T22:39:07Z",
-      "updatedAt": "2021-10-16T22:58:26Z",
+      "updatedAt": "2021-10-18T07:55:28Z",
       "baseRepository": "mirjak/draft-lmbdhk-quic-multipath",
       "baseRefName": "master",
       "baseRefOid": "b6331e57d7373526cc4af756386473ca16ece41a",
@@ -906,7 +1046,15 @@
       "mergeCommit": {
         "oid": "bd63a177aa2a8d2d98146481d829b6b99216d470"
       },
-      "comments": [],
+      "comments": [
+        {
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "body": "I actually think we should have keep stand-by. I think this was useful in MPTCP and it's not really related to scheduling. Stand-by only means: I won't use this path but please keep it open.",
+          "createdAt": "2021-10-18T07:55:28Z",
+          "updatedAt": "2021-10-18T07:55:28Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOGNtpaM4ukYGU",
@@ -1014,25 +1162,35 @@
       "id": "PR_kwDOGNtpaM4tRyj5",
       "title": "[+] add definitions for transport parameter",
       "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/pull/20",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "Yanmei-Liu",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2021-10-16T10:52:42Z",
-      "updatedAt": "2021-10-16T15:50:20Z",
+      "updatedAt": "2021-10-18T07:53:29Z",
       "baseRepository": "mirjak/draft-lmbdhk-quic-multipath",
       "baseRefName": "master",
       "baseRefOid": "0fccf8df3dfd72ff100d5724275250fc205a71bf",
       "headRepository": "mirjak/draft-lmbdhk-quic-multipath",
       "headRefName": "dev/options_for_pn_space",
       "headRefOid": "1f3fb551d7c2f60d3799d40e13c8b4d8721a528f",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "closedAt": "2021-10-18T07:08:16Z",
+      "mergedAt": "2021-10-18T07:08:16Z",
+      "mergedBy": "qdeconinck",
+      "mergeCommit": {
+        "oid": "4fcc470e59017459f031e1a3fad5c39faa5c1301"
+      },
+      "comments": [
+        {
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "body": "I just want to note that I used value 1 for multiple packet number spaces to bee compatible with what is already used by Alibaba. However, if that change it not a problem for Alibaba, this order is slightly nicer.",
+          "createdAt": "2021-10-18T07:53:29Z",
+          "updatedAt": "2021-10-18T07:53:29Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOGNtpaM4uksGE",
@@ -1046,6 +1204,19 @@
           "createdAt": "2021-10-16T15:50:20Z",
           "updatedAt": "2021-10-16T15:50:20Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4ulylI",
+          "commit": {
+            "abbreviatedOid": "1f3fb55"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-10-18T07:07:54Z",
+          "updatedAt": "2021-10-18T07:07:54Z",
+          "comments": []
         }
       ]
     },
@@ -1054,24 +1225,26 @@
       "id": "PR_kwDOGNtpaM4tR0Qo",
       "title": "[+] add error codes for IANA registry",
       "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/pull/21",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "Yanmei-Liu",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2021-10-16T11:45:11Z",
-      "updatedAt": "2021-10-16T15:53:27Z",
+      "updatedAt": "2021-10-18T07:09:34Z",
       "baseRepository": "mirjak/draft-lmbdhk-quic-multipath",
       "baseRefName": "master",
       "baseRefOid": "0fccf8df3dfd72ff100d5724275250fc205a71bf",
       "headRepository": "mirjak/draft-lmbdhk-quic-multipath",
       "headRefName": "dev/error_code",
       "headRefOid": "86a198adff0c6f477b6ce60d9a0defedd0f32f4f",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2021-10-18T07:09:34Z",
+      "mergedAt": "2021-10-18T07:09:34Z",
+      "mergedBy": "qdeconinck",
+      "mergeCommit": {
+        "oid": "9c2773aee0240eb4958d6b476d799f06f216bdef"
+      },
       "comments": [],
       "reviews": [
         {
@@ -1086,8 +1259,115 @@
           "createdAt": "2021-10-16T15:53:27Z",
           "updatedAt": "2021-10-16T15:53:27Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4uly5I",
+          "commit": {
+            "abbreviatedOid": "86a198a"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-10-18T07:09:24Z",
+          "updatedAt": "2021-10-18T07:09:24Z",
+          "comments": []
         }
       ]
+    },
+    {
+      "number": 23,
+      "id": "PR_kwDOGNtpaM4tT8jM",
+      "title": "ACK_MP only valid using multiple packet number spaces",
+      "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/pull/23",
+      "state": "MERGED",
+      "author": "qdeconinck",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #8.",
+      "createdAt": "2021-10-18T08:34:32Z",
+      "updatedAt": "2021-10-18T17:26:24Z",
+      "baseRepository": "mirjak/draft-lmbdhk-quic-multipath",
+      "baseRefName": "master",
+      "baseRefOid": "74e66ac8569cab84f21a4ef5a7d0e14ac084f7b7",
+      "headRepository": "qdeconinck/draft-lmbdhk-quic-multipath",
+      "headRefName": "ack-mp-single-psn",
+      "headRefOid": "94192df0e6e8857a38f2a6a5426c501bdd818096",
+      "closedAt": "2021-10-18T17:26:24Z",
+      "mergedAt": "2021-10-18T17:26:24Z",
+      "mergedBy": "mirjak",
+      "mergeCommit": {
+        "oid": "d48c10ceb1430ccfaae823affd8fa28c361425ec"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGNtpaM4umKdo",
+          "commit": {
+            "abbreviatedOid": "94192df"
+          },
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-10-18T08:42:33Z",
+          "updatedAt": "2021-10-18T08:42:33Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4umpXp",
+          "commit": {
+            "abbreviatedOid": "94192df"
+          },
+          "author": "Yanmei-Liu",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Look good to me.",
+          "createdAt": "2021-10-18T10:40:51Z",
+          "updatedAt": "2021-10-18T10:40:51Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4uoYGb",
+          "commit": {
+            "abbreviatedOid": "94192df"
+          },
+          "author": "huitema",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-10-18T16:54:58Z",
+          "updatedAt": "2021-10-18T16:54:58Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 24,
+      "id": "PR_kwDOGNtpaM4tUzj0",
+      "title": "Introduce finite state machine for path's state",
+      "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/pull/24",
+      "state": "OPEN",
+      "author": "qdeconinck",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Initial attempt to solve #10.",
+      "createdAt": "2021-10-18T12:49:40Z",
+      "updatedAt": "2021-10-18T12:49:40Z",
+      "baseRepository": "mirjak/draft-lmbdhk-quic-multipath",
+      "baseRefName": "master",
+      "baseRefOid": "960cbcb892f3a106882796b69fb2f995b64bb17b",
+      "headRepository": "qdeconinck/draft-lmbdhk-quic-multipath",
+      "headRefName": "path-states",
+      "headRefOid": "dbbbbcc7f7e04a81ed5dd16199432ce069de0307",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
