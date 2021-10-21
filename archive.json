@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-10-19T00:30:52.005439+00:00",
+  "timestamp": "2021-10-21T00:33:44.610306+00:00",
   "repo": "mirjak/draft-lmbdhk-quic-multipath",
   "labels": [
     {
@@ -487,7 +487,7 @@
       "labels": [],
       "body": "I believe stand-by (or backup) has been useful in MPTCP. This is not really about scheduling because all it says is: I won't use this path actively(yet)  but please leave it open.",
       "createdAt": "2021-10-18T07:56:55Z",
-      "updatedAt": "2021-10-18T09:34:28Z",
+      "updatedAt": "2021-10-20T07:54:55Z",
       "closedAt": null,
       "comments": [
         {
@@ -496,6 +496,34 @@
           "body": "IMHO, this is a (simple) form of path prioritization. I'm not sure it should be part of the current. We could delegate this point to an \"advanced\" path management draft.",
           "createdAt": "2021-10-18T09:34:28Z",
           "updatedAt": "2021-10-18T09:34:28Z"
+        },
+        {
+          "author": "obonaventure",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I agree that this should not be in the core. Let's start by assuming that all established paths can be used. We will then be able to add mechanisms to indicate that some existing paths should not currently be used. In MPTCP we only had limit messages to do this. In QUIC, we will have more flexibility in the definition of frames to encode such information if needed.\r\n",
+          "createdAt": "2021-10-19T09:33:04Z",
+          "updatedAt": "2021-10-19T09:33:04Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "body": "Okay, actually there might be two different signals here: One is \"please do not use this path as long as you have others\" but the other is \"please keep this path open even if I don't use it\". I agree we don't need the first one but I thought the second one might be useful because otherwise if no packets are received on a path the other end might assume the path to be closed after an idle time, no?",
+          "createdAt": "2021-10-19T09:40:09Z",
+          "updatedAt": "2021-10-19T09:40:09Z"
+        },
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "COLLABORATOR",
+          "body": "One problem is NAT timeout when we want to keep a path open but do not send any traffic. To solve this, we may want to send \"ping\" at a very low frequency to keep that path alive. Suppose if we don't have a stand-by state (which I think we should have eventually), but we do employ this ping mechanism to keep that path alive, does it solve Mirja's problem as now the other end won't close that path because it receives some \"ping\"s at a very low frequency?",
+          "createdAt": "2021-10-19T20:57:48Z",
+          "updatedAt": "2021-10-19T20:57:48Z"
+        },
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I indeed think that we should have some mechanism (like sending a PING frame) to avoid some \"path idle timeout\".",
+          "createdAt": "2021-10-20T07:54:55Z",
+          "updatedAt": "2021-10-20T07:54:55Z"
         }
       ]
     },
@@ -542,9 +570,90 @@
       "labels": [],
       "body": "Based on the discussed from the side meeting, we need to\r\n\r\n- Clarify that the goal is to only select one approach for the finally published solution in an RFC\r\n- Add some discussion about the pros and cons to the appendix",
       "createdAt": "2021-10-18T17:28:52Z",
-      "updatedAt": "2021-10-18T17:28:52Z",
+      "updatedAt": "2021-10-19T21:00:01Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yes, I think we should have these discussions in the current draft.",
+          "createdAt": "2021-10-19T21:00:01Z",
+          "updatedAt": "2021-10-19T21:00:01Z"
+        }
+      ]
+    },
+    {
+      "number": 27,
+      "id": "I_kwDOGNtpaM49ZPRt",
+      "title": "Multiple packet number spaces can be compatible with zero-length Connection IDs",
+      "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/issues/27",
+      "state": "OPEN",
+      "author": "qdeconinck",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Currently, the multiple packet number spaces proposal relies on the sequence number of the Connection ID when a non-zero connection ID is used. With non-zero-length Connection IDs at both ends, it is indeed possible that over a same path/5-tuple, the client reaches the server using a DCID with a sequence number that is different from the sequence number of the DCID used by the server to reach the client (e.g., Figure 2). In the current draft, we consider that if the connection ID is zero-length, the packet number space identifier is 0, and applying multiple packet number spaces is thus not possible.\r\n\r\nI believe we can do better than this. Consider the situation where the client uses a non-zero length DCID to reach the server while the server uses zero-length DCID. In this case, it is the client that initiates the usage of a path with path validation, associating a server-provided non-zero-length DCID to reach the server. Once the first client's packet reaches the server on the new path, the server can associate the client's 5-tuple to the sequence number of the used Destination Connection ID, making a valid Packet Number Space Identifier. The client can easily map incoming packets on the 5-tuple to the associated DCID sequence number.\r\n\r\nDoes this sound reasonable?",
+      "createdAt": "2021-10-19T08:43:58Z",
+      "updatedAt": "2021-10-20T07:48:17Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "body": "I think there is room to find a solution here but as I understand it, currently the PN Space ID is independent on each side because the DID sequence number is as well. In order to realise an approach as you describe you need some kind of synchronisation on the used CID sequence numbers to avoid that the same number is used on both side. But such sync could be easy (e.g. use even and odd numbers) and maybe it would make sense...?",
+          "createdAt": "2021-10-19T09:16:47Z",
+          "updatedAt": "2021-10-19T09:16:47Z"
+        },
+        {
+          "author": "obonaventure",
+          "authorAssociation": "COLLABORATOR",
+          "body": "When null-CID is used for the server->client direction, the client does not propose any CID nor use them. All the CID numbers are thus only provided by the server and there is no risk of confusion.",
+          "createdAt": "2021-10-19T09:30:44Z",
+          "updatedAt": "2021-10-19T09:30:44Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "body": "Ah right! Yes we should add that!",
+          "createdAt": "2021-10-19T09:37:32Z",
+          "updatedAt": "2021-10-19T09:37:32Z"
+        },
+        {
+          "author": "nibanks",
+          "authorAssociation": "NONE",
+          "body": "I believe this design _may_ work, but I would be a bit sad that the client would have to support one mode of decryption when using a zero-length CID and another mode when it's not.\r\n\r\nAlso, I think there have been discussions of scenarios where the server may use zero-length CIDs too, maybe in the P2P scenarios. Things break down there, and it's not great to have a design where it breaks down in certain circumstances.",
+          "createdAt": "2021-10-19T12:47:11Z",
+          "updatedAt": "2021-10-19T12:47:11Z"
+        },
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Ah right! Yes we should add that!\r\n\r\nIn the path identifier, we currently have three types. \r\n\r\n Path Identifier {\r\n    Identifier Type (i) = 0x00..0x02,\r\n    Path Identifier Content (i),\r\n  }\r\n\r\nWhen a client uses non-zero CID, but the server uses zero-length CID, type 0x02 should be used. What Olivier suggested was that we should also apply a similar strategy to the PN space identifier.\r\n ",
+          "createdAt": "2021-10-19T20:30:04Z",
+          "updatedAt": "2021-10-19T20:30:04Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The current proposal derives the nonce strictly from bytes in the packet. The decryption module only needs to know which CID belong to the connection and what is their CID sequence number. You could offload that. But if you want to use different encryption for different packets all with the same CID, you need some other context, such as addresses and port numbers. That will not work for the first packet received on a four tuple, or if in the case of NAT rebinding. Seems much more error prone.",
+          "createdAt": "2021-10-20T02:28:46Z",
+          "updatedAt": "2021-10-20T02:28:46Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Also, let's be clear that receivers and senders always use different sequence numbers, even with tcp. I cannot see why this is a problem.",
+          "createdAt": "2021-10-20T02:29:54Z",
+          "updatedAt": "2021-10-20T02:29:54Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "body": "In case of a NAT rebinding you should have a CID (from the client to server). However, you are right that this would mean that only the client can open new paths.",
+          "createdAt": "2021-10-20T07:48:17Z",
+          "updatedAt": "2021-10-20T07:48:17Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -891,13 +1000,13 @@
       "labels": [],
       "body": "There is a SHOULD here, which I believe should be a MUST as we taking about the receiver behaviour here.",
       "createdAt": "2021-10-15T20:18:48Z",
-      "updatedAt": "2021-10-18T07:51:54Z",
+      "updatedAt": "2021-10-20T09:10:21Z",
       "baseRepository": "mirjak/draft-lmbdhk-quic-multipath",
       "baseRefName": "master",
       "baseRefOid": "b6331e57d7373526cc4af756386473ca16ece41a",
       "headRepository": "mirjak/draft-lmbdhk-quic-multipath",
       "headRefName": "mirjak-patch-1",
-      "headRefOid": "edbfa5ca89653bb2baca6da8600af88d9d7cc7ae",
+      "headRefOid": "6be669710bb226f4ac0124ab19529eba4b065ca4",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -963,6 +1072,59 @@
               "updatedAt": "2021-10-18T07:51:54Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4uvQ8C",
+          "commit": {
+            "abbreviatedOid": "edbfa5c"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-20T08:15:16Z",
+          "updatedAt": "2021-10-20T08:15:16Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "Maybe a way to rephrase this:\r\n\"An endpoint sending 1-RTT packets MUST use different Connection IDs on different paths, if non-zero-length Connection IDs are used. Still, the receiver may observe the same Connection ID used on different 4-tuples due to, e.g., NAT rebinding. In such case, the receiver reacts as specified in {{Section 9.3 of QUIC-TRANSPORT}}.\"",
+              "createdAt": "2021-10-20T08:15:16Z",
+              "updatedAt": "2021-10-20T08:15:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4uvRlG",
+          "commit": {
+            "abbreviatedOid": "edbfa5c"
+          },
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-20T08:17:35Z",
+          "updatedAt": "2021-10-20T08:17:36Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "```suggestion\r\nAn endpoint sending 1-RTT packets MUST use different Connection IDs on different paths, if non-zero-length\r\nConnection IDs are used. Still, the receiver may observe the same Connection ID used on different 4-tuples\r\ndue to, e.g., NAT rebinding. In such case, the receiver reacts as specified in\r\n{{Section 9.3 of QUIC-TRANSPORT}}.\r\n```",
+              "createdAt": "2021-10-20T08:17:35Z",
+              "updatedAt": "2021-10-20T08:17:36Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4uvghn",
+          "commit": {
+            "abbreviatedOid": "6be6697"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-10-20T09:10:21Z",
+          "updatedAt": "2021-10-20T09:10:21Z",
+          "comments": []
         }
       ]
     },
