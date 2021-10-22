@@ -5,14 +5,14 @@
 QUIC Working Group                                                Y. Liu
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 22 April 2022                                     Q. De Coninck
+Expires: 25 April 2022                                     Q. De Coninck
                                                           O. Bonaventure
                                                                UCLouvain
                                                               C. Huitema
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                         19 October 2021
+                                                         22 October 2021
 
 
                       Multipath Extension for QUIC
@@ -50,7 +50,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 April 2022.
+   This Internet-Draft will expire on 25 April 2022.
 
 Copyright Notice
 
@@ -380,8 +380,11 @@ Table of Contents
    frames to signal acknowledgement of 1-RTT packets on path number 0,
    and also 0-RTT packets as specified in Section 6.1.
 
-   1-RTT packets sent to different paths SHOULD carry different
-   connection identifiers, if a non-zero connection ID is used.
+   An endpoint sending 1-RTT packets MUST use different Connection IDs
+   on different paths, if non-zero-length Connection IDs are used.
+   Still, the receiver may observe the same Connection ID used on
+   different 4-tuples due to, e.g., NAT rebinding.  In such case, the
+   receiver reacts as specified in Section 9.3 of [QUIC-TRANSPORT].
 
 6.1.  Handling of 0-RTT Packets
 
