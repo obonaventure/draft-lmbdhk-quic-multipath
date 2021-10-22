@@ -923,7 +923,11 @@ Table of Contents
               "*** BROKEN REFERENCE ***".
 
    [I-D.liu-multipath-quic]
-              "*** BROKEN REFERENCE ***".
+              Huitema, C., "Quic Timestamps For Measuring One-Way
+              Delays", Work in Progress, Internet-Draft, draft-huitema-
+              quic-ts-06, 12 September 2021,
+              <https://datatracker.ietf.org/doc/html/draft-huitema-quic-
+              ts-06>.
 
    [OLIA]     Khalili, R., Gast, N., Popovic, M., Upadhyay, U., and J.-
               Y. Le Boudec, "MPTCP is not pareto-optimal: performance
@@ -942,7 +946,12 @@ Table of Contents
               May 2021, <https://datatracker.ietf.org/doc/html/rfc9002>.
 
    [QUIC-Timestamp]
-              "*** BROKEN REFERENCE ***".
+              Bonaventure, O., Piraux, M., Coninck, Q. D., Baerts, M.,
+              Paasch, C., and M. Amend, "Multipath schedulers", Work in
+              Progress, Internet-Draft, draft-bonaventure-iccrg-
+              schedulers-01, 9 September 2020,
+              <https://datatracker.ietf.org/doc/html/draft-bonaventure-
+              iccrg-schedulers-01>.
 
    [RFC6356]  Raiciu, C., Handley, M., and D. Wischik, "Coupled
               Congestion Control for Multipath Transport Protocols",
