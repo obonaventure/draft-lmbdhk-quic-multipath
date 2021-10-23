@@ -1555,7 +1555,7 @@ the common number space, so that, for example, packet number N could be sent on 
 That means the senders needs to maintain an association between sent packet numbers and
 the path over which these packets were sent. This is necessary to implement per path congestion control.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
 <p id="section-6.1-3">When a packet is acknowledged, the state of the congestion control MUST be updated for the path
-where the acknowledge packet was originally sent.
+where the acknowledged packet was originally sent.
 The RTT is calculated based on the delay between the transmission of that packet and
 its first acknowledgement (see Section <a href="#compute-rtt" class="xref">Section 6.1.2</a>) and is used to update the RTT statistics for the sending path.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
 <p id="section-6.1-4">Also loss detection MUST be adapted to allow for different RTTs on
