@@ -1664,12 +1664,12 @@ provides more robust measurements.<a href="#section-6.1.2-5" class="pilcrow">¶<
 Compared to the QUIC v1 ACK frame, the MP_ACK frames additionally contains a Packet Number Space Identifier (PN Space ID).
 The PN Space ID used to distinguish packet number spaces for different paths and is simply derived from the sequence number of Destination Connection ID.
 Therefore, the packet number space for 1-RTT packets can be identified based on the Destination Connection ID in each packets.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
-<p id="section-6.2-2">As soon as the negotiate of multipath support with value 2 is completed,
+<p id="section-6.2-2">As soon as the negotiation of multipath support with value 2 is completed,
 endpoints SHOULD use ACK_MP frames instead of ACK frames for acknowledgements of 1-RTT packets on path 0,
 as well as for 0-RTT packets that are acknowledged after the handshake concluded.<a href="#section-6.2-2" class="pilcrow">¶</a></p>
 <p id="section-6.2-3">Following <span>[<a href="#QUIC-TRANSPORT" class="xref">QUIC-TRANSPORT</a>]</span>, each endpoint uses NEW_CONNECTION_ID frames to issue usable connections IDs
-to reach it. Before an endpoint adds a new path by initiatiing path validation, it MUST check whether there has at least one unused
-available Connection ID for each side.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
+to reach it. Before an endpoint adds a new path by initiating path validation, it MUST check whether at least one unused
+Connection ID is available for each side.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
 <p id="section-6.2-4">If the transport parameter "active_connection_id_limit" is negotiated as N,
 the server provided N Connection IDs, and the client is already actively using N paths,
 the limit is reached. If the client wants to start a new path, it has to retire
@@ -1702,7 +1702,7 @@ of <span>[<a href="#QUIC-TRANSPORT" class="xref">QUIC-TRANSPORT</a>]</span>, or 
 Section 19 of <span>[<a href="#QUIC-TRANSPORT" class="xref">QUIC-TRANSPORT</a>]</span> encodes the Connection ID Sequence Number as a variable-length integer,
 allowing values up to 2^62-1; in this specification a range of less than 2^32-1
 values MUST be used before updating the packet protection key.<a href="#section-6.2.1-4" class="pilcrow">¶</a></p>
-<p id="section-6.2.1-5">To calcullate the nonce, a 96 bit
+<p id="section-6.2.1-5">To calculate the nonce, a 96 bit
 path-and-packet-number is composed of the 32 bit Connection ID Sequence Number in byte order,
 two zero bits, and the 62 bits of the reconstructed QUIC packet number in network byte order.
 If the IV is larger than 96 bits, the path-and-packet-number is left-padded with zeros to the
@@ -1807,7 +1807,7 @@ or migration.<a href="#section-7.1-5" class="pilcrow">¶</a></p>
         <h3 id="name-path-closure">
 <a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-path-closure" class="section-name selfRef">Path Closure</a>
         </h3>
-<p id="section-7.2-1">In this exmaple the client detects the network environment change (client's 4G/Wi-Fi is turned off,
+<p id="section-7.2-1">In this example the client detects the network environment change (client's 4G/Wi-Fi is turned off,
 Wi-Fi signal is fading to a threshold, or the quality of RTT or loss rate is
 becoming worse) and wants to close the initial path.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
 <p id="section-7.2-2">In Figure <a href="#fig-example-path-close" class="xref">Figure 3</a> the server's
