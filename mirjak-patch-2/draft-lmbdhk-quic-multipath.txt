@@ -393,8 +393,8 @@ Table of Contents
    is necessary to implement per path congestion control.
 
    When a packet is acknowledged, the state of the congestion control
-   MUST be updates for the path where the acknowledge packet was
-   orginially sent.  The RTT is calculated based on the delay between
+   MUST be updated for the path where the acknowledge packet was
+   originally sent.  The RTT is calculated based on the delay between
    the transmission of that packet and its first acknowledgement (see
    Section Section 6.1.2) and is used to update the RTT statistics for
    the sending path.
