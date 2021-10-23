@@ -5,14 +5,14 @@
 QUIC Working Group                                                Y. Liu
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 25 April 2022                                     Q. De Coninck
+Expires: 26 April 2022                                     Q. De Coninck
                                                           O. Bonaventure
                                                                UCLouvain
                                                               C. Huitema
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                         22 October 2021
+                                                         23 October 2021
 
 
                       Multipath Extension for QUIC
@@ -50,7 +50,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 25 April 2022.
+   This Internet-Draft will expire on 26 April 2022.
 
 Copyright Notice
 
@@ -358,7 +358,7 @@ Table of Contents
 
    If the connection ID is present (non-zero length) in the packet
    header, the connection ID is used to identify the path.  If no
-   connection ID is present, the 4 tuple identies the path.  The intital
+   connection ID is present, the 4 tuple identies the path.  The initial
    path that is used during the handshake (and multipath negotiation)
    has the path ID 0 and therefore all 0-RTT packets are also tracked
    and processed with the path ID 0.  For 1-RTT packets the path ID is
@@ -928,7 +928,11 @@ Table of Contents
               iccrg-schedulers-01>.
 
    [I-D.liu-multipath-quic]
-              "*** BROKEN REFERENCE ***".
+              Liu, Y., Ma, Y., Huitema, C., An, Q., and Z. Li,
+              "Multipath Extension for QUIC", Work in Progress,
+              Internet-Draft, draft-liu-multipath-quic-04, 5 September
+              2021, <https://datatracker.ietf.org/doc/html/draft-liu-
+              multipath-quic-04>.
 
    [OLIA]     Khalili, R., Gast, N., Popovic, M., Upadhyay, U., and J.-
               Y. Le Boudec, "MPTCP is not pareto-optimal: performance
@@ -947,7 +951,11 @@ Table of Contents
               May 2021, <https://datatracker.ietf.org/doc/html/rfc9002>.
 
    [QUIC-Timestamp]
-              "*** BROKEN REFERENCE ***".
+              Huitema, C., "Quic Timestamps For Measuring One-Way
+              Delays", Work in Progress, Internet-Draft, draft-huitema-
+              quic-ts-06, 12 September 2021,
+              <https://datatracker.ietf.org/doc/html/draft-huitema-quic-
+              ts-06>.
 
    [RFC6356]  Raiciu, C., Handley, M., and D. Wischik, "Coupled
               Congestion Control for Multipath Transport Protocols",
