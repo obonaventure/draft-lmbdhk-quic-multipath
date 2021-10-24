@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-10-21T00:33:44.610306+00:00",
+  "timestamp": "2021-10-24T00:30:48.202010+00:00",
   "repo": "mirjak/draft-lmbdhk-quic-multipath",
   "labels": [
     {
@@ -62,7 +62,7 @@
       "labels": [],
       "body": "There is one part I am afraid people might feel a little bit hard to follow: the three types of path identifiers in the PATH_STATUS frame. Those three types of path identifiers were introduced in order to be compatible with zero-length CID use cases, so I think we might need two additional example figures (like figure 3 in the current draft), one for (non-zero length CID, zero-length CID) and the other one for (zero-length CID & zero-length CID). Do you think that is a good idea? I can work on those figures if it doesn't complicate the flow of the draft.",
       "createdAt": "2021-10-15T05:54:13Z",
-      "updatedAt": "2021-10-18T01:51:53Z",
+      "updatedAt": "2021-10-21T05:53:51Z",
       "closedAt": null,
       "comments": [
         {
@@ -113,6 +113,13 @@
           "body": "I changed the timeout to 3RTO. As the problem is similar to FIN-ACK&FIN-ACK when TCP closes, I kept the ACK in the graph (because the path_id_type=2 refers to the path where the packet is traveling, we want to make sure it is acked before we close the path.). Regarding the resource, I think if we keep a unified receive record, which is not per-path, yes, we can discard the sending resources. But if we have some path stats (e.g. how many packets received in total in this current activity cycle), we need to keep these data structures until we are sure that the peer is not going to send more packets on that path. Indeed, it depends on the implementation, but I feel it is generally helpful to have PATH_ABANDON sent in both directions. What do you think?\r\n\r\n~~~\r\n  Client                                                      Server\r\n\r\n  (client tells server to abandon a path)\r\n  1-RTT[X]: DCID=S2 PATH_ABANDON[path_id_type=1, path_id=2]->\r\n                             (server tells client to abandon a path)\r\n                <-1-RTT[Y]: PATH_ABANDON[path_id_type=0, path_id=2],\r\n                                                           ACK[PN=X]\r\n  (client abandons the path that it is using\r\n  and waits for 3*RTO to close the path)\r\n  1-RTT[X+1]: DCID=S3 RETIRE_CONNECTION_ID[2],\r\n                                     ACK[PN=Y]->\r\n                                            (server closes the path)\r\n\r\n~~~\r\n{: #fig-example-path-close2 title=\"Example of closing a path when the server chooses to use zero-length CID\"}\r\n\r\n~~~\r\n  Client                                                     Server\r\n\r\n  (client tells server to abandon a path)\r\n  1-RTT[X]: DCID=S2 PATH_ABANDON[path_id_type=2]->\r\n                            (server tells client to abandon a path)\r\n                          <-1-RTT[Y]: PATH_ABANDON[path_id_type=2],\r\n                                                          ACK[PN=X]\r\n  (client waits for 3*RTO to close the path)\r\n  1-RTT[X+1]: ACK[PN=Y]->\r\n                         (server waits for 3*RTO to close the path)\r\n\r\n~~~\r\n{: #fig-example-path-close3 title=\"Example of closing a path when both client and server choose to use zero-length CIDs.\"}",
           "createdAt": "2021-10-18T01:51:53Z",
           "updatedAt": "2021-10-18T01:51:53Z"
+        },
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I submitted PR #28 . Let's first have sth that we can start modifying.",
+          "createdAt": "2021-10-21T05:53:51Z",
+          "updatedAt": "2021-10-21T05:53:51Z"
         }
       ]
     },
@@ -121,15 +128,15 @@
       "id": "I_kwDOGNtpaM49OM7s",
       "title": "idle timeout issues",
       "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/issues/2",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "yfmascgy",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "The current draft says \"_Servers SHOULD stop sending traffic on paths through which non-probing packet was received in the last 3 path RTTs, but MAY ignore that rule if it would disqualify all available paths_\". First, I believe there is a typo, where the \"non-probing packet\" should be \"**no** non-probing packet\". Second, 3 RTT is too short for our applications and we prefer a longer timeout. Maybe we want to add a new parameter (e.g. max_path_idle_timeout) to allow the server and client to negotiate?",
       "createdAt": "2021-10-15T06:47:33Z",
-      "updatedAt": "2021-10-15T22:44:01Z",
-      "closedAt": null,
+      "updatedAt": "2021-10-21T14:43:08Z",
+      "closedAt": "2021-10-21T14:43:08Z",
       "comments": [
         {
           "author": "mirjak",
@@ -186,6 +193,13 @@
           "body": "I submitted PR #19  on this issue.",
           "createdAt": "2021-10-15T22:41:04Z",
           "updatedAt": "2021-10-15T22:44:01Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "body": "This PR was merged.",
+          "createdAt": "2021-10-21T14:43:08Z",
+          "updatedAt": "2021-10-21T14:43:08Z"
         }
       ]
     },
@@ -570,7 +584,7 @@
       "labels": [],
       "body": "Based on the discussed from the side meeting, we need to\r\n\r\n- Clarify that the goal is to only select one approach for the finally published solution in an RFC\r\n- Add some discussion about the pros and cons to the appendix",
       "createdAt": "2021-10-18T17:28:52Z",
-      "updatedAt": "2021-10-19T21:00:01Z",
+      "updatedAt": "2021-10-23T05:36:24Z",
       "closedAt": null,
       "comments": [
         {
@@ -579,6 +593,27 @@
           "body": "Yes, I think we should have these discussions in the current draft.",
           "createdAt": "2021-10-19T21:00:01Z",
           "updatedAt": "2021-10-19T21:00:01Z"
+        },
+        {
+          "author": "Yanmei-Liu",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Should we use a new code point for the transport parameter of the options? \r\nFor 2 reasons:\r\n- It's a new joint version\r\n- As we use a different value definition in our current implementation, it's hard to deploy the new version in a synchronised way, at least we could keep compatible if we use a new transport parameter.\r\n\r\nWhat do you think? Or maybe we should keep it unchanged until the WG is ready to adopt the draft?",
+          "createdAt": "2021-10-22T06:07:07Z",
+          "updatedAt": "2021-10-22T06:07:07Z"
+        },
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think it is fine to define a new value for the transport parameter, the 00 version of this draft is not yet out anyway.",
+          "createdAt": "2021-10-22T07:07:03Z",
+          "updatedAt": "2021-10-22T07:07:03Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yes, please use a new parameter.",
+          "createdAt": "2021-10-23T05:36:24Z",
+          "updatedAt": "2021-10-23T05:36:24Z"
         }
       ]
     },
@@ -654,6 +689,153 @@
           "updatedAt": "2021-10-20T07:48:17Z"
         }
       ]
+    },
+    {
+      "number": 31,
+      "id": "I_kwDOGNtpaM49nWKa",
+      "title": "Use of client/server",
+      "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/issues/31",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Due to the copying&pasting from different documents, we use sometimes client/server and sometimes endpoint/peer in the draft. If I understand everything correctly, both endpoint can open (start validation) and close paths, correct?\r\n\r\nThere I would propose to remove all instances of client/server from the draft (expect for the handshake negotiation part). I can do that but wanted to check first if that's the correct thing to do",
+      "createdAt": "2021-10-22T15:50:38Z",
+      "updatedAt": "2021-10-23T15:21:18Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "huitema",
+          "authorAssociation": "COLLABORATOR",
+          "body": "No, that is not correct. Only the client can open new paths, per section 9 of RFC 9000:\r\n```\r\n   This document limits migration of connections to new client\r\n   addresses, except as described in Section 9.6.  Clients are\r\n   responsible for initiating all migrations.  Servers do not send non-\r\n   probing packets (see Section 9.1) toward a client address until they\r\n   see a non-probing packet from that address.  If a client receives\r\n   packets from an unknown server address, the client MUST discard these\r\n   packets.\r\n```",
+          "createdAt": "2021-10-23T06:41:15Z",
+          "updatedAt": "2021-10-23T06:41:15Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "body": "Yes, I know this text in RFC9000. I was wondering if we can release this restriction?\r\n\r\nFor migration all use cases assumped that the client would move (or be NATed). However for multiipath I think there are also use cases where the server side might have multiple paths (e.g. in the proxy case).\r\n\r\nSo could we remove this restriction just, or are there problem with that?",
+          "createdAt": "2021-10-23T07:30:45Z",
+          "updatedAt": "2021-10-23T07:30:45Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The restriction is due to general considerations about NAT traversal, server farms, etc. I think we agreed already that this kind of deviation from RFC 9000 belongs in a separate extension, much like unidirectional paths or discovery of alternate server addresses. It should not be negotiated as part of the \"multipath core\". I would rather see that as part of peer-to-peer extensions.",
+          "createdAt": "2021-10-23T15:21:18Z",
+          "updatedAt": "2021-10-23T15:21:18Z"
+        }
+      ]
+    },
+    {
+      "number": 32,
+      "id": "I_kwDOGNtpaM49nX22",
+      "title": "Abandon needs clarification",
+      "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/issues/32",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "The text says that both endpoint can send an abandon frame. However, if I understand the current text correctly it only says that the receiving peer of that frame can remove its state as the sender of the abandon frame indicated it will not send any more packets ion that path. However, the sender of the abandon frame can't remove its state until it also receives an abandon frame from the other end. That would mean a path can \"half-open\"... \r\n\r\nDo we need to say something that that the receiver of an abandon frame SHOULD also send an abandon frame in response? Or MAY? Or MUST?\r\n\r\nOr is the path considered completely closed as soon as an ACK for the packet containing the abandon frame is received? In this case we need to say that when an abandon frame is received, the receiver MUST not use that path anymore.\r\n\r\nI think we need to clarify that!\r\n\r\nPlease provide a PR or let me know what the intention was and I can write something!\r\n\r\n\r\n",
+      "createdAt": "2021-10-22T15:58:37Z",
+      "updatedAt": "2021-10-23T07:20:13Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "huitema",
+          "authorAssociation": "COLLABORATOR",
+          "body": "For me, ABANDON_PATH means \"please stop sending on that path, I may soon stop listening\". The peer should definitely stop sending on that path. It may want to keep listening for a short time, because some packets may still be sent out of order. It may also want to keep some context to process acknowledgement of packets previously sent on that path. The general guidance is to to wait for something like 3xRTO before dropping path management resource.\r\n\r\nI don't think that we need symmetry, that both peers have to abandon the path before they can release resource. But we have to solve a potential path suicide problem. Suppose we have two paths, peer 1 abandons path #1, peer 2 abandon path #2. Now we have zero path, and the connection is closed -- unless the client promptly opens a new path #3. My original intention is that only the client ever sends an ABANDON_PATH, since only the client can initiate a new path, which dodges the path suicide issue. ",
+          "createdAt": "2021-10-23T06:55:49Z",
+          "updatedAt": "2021-10-23T06:55:49Z"
+        },
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Good questions! For me, the issue is that when an endpoint decides to close a path, it is probably due to that the path condition is getting worse, which also means that further communication on that path may fail. When we use non-zero CID, as we should have at least one path that is working (if no path is working, the connection will be closed), and we are not constraint to send PATH_ABANDON frame on the same path that we want to close, the sender should be able to receive the ACK of PATH_ABANDON. But when we use null CID, we use path_id_type 0x02, which refers to the path where the packet is coming from, and hence, we are constraint to send PATH_ABANDON on the same path we want to close. In such a case, it is likely that the ACK of PATH_ABANDON will not be received, resulting in the \"half-open\" problem. Therefore, we should say sth like \"when the sender moves into the \"ABANDON_SENT\" state, and after 3RTO, it should close the path even if it hasn't seen the PATH_ABANDON sent from its peer\". \r\n",
+          "createdAt": "2021-10-23T07:05:08Z",
+          "updatedAt": "2021-10-23T07:05:08Z"
+        },
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Also, regarding when a path is considered completely closed, the current intention is that a path is considered closed when both the sender-side and the receiver-side resources of that path are released. The sender-side resources can be readily released when PATH_ABANDON is acked (We may need to retransmit the path_abandon). The receiver-side resources are released when the RETIRE_CID frame is received. However, when zero-CID is used, it is possible that an endpoint is not going to receive any RETIRE_CID frames, so the receiver-side resources are released 3RTO after sending out the PATH_ABANDON.",
+          "createdAt": "2021-10-23T07:20:13Z",
+          "updatedAt": "2021-10-23T07:20:13Z"
+        }
+      ]
+    },
+    {
+      "number": 33,
+      "id": "I_kwDOGNtpaM49nYca",
+      "title": "Basic Scheduling Guidance ",
+      "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/issues/33",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "I have a sentence in the intro that this draft provide some basic scheduling guidance. I was think about something like: Data belonging to the same stream should be sent over the same path. If a new stream is opened, a packet is selected based on the current load (e.g. number of stream/max congestion window). Or something else?\r\n\r\nOr is the plan to really not say anything here?",
+      "createdAt": "2021-10-22T16:01:19Z",
+      "updatedAt": "2021-10-23T06:57:44Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "COLLABORATOR",
+          "body": "How about we specify two basic modes according to steering and aggregation? For steering, we send data belonging to the same stream over the same path. For aggregation, we simply use round-robin to split data of the same stream over multiple paths. ",
+          "createdAt": "2021-10-23T06:07:10Z",
+          "updatedAt": "2021-10-23T06:07:10Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The same-stream same-path rule is actually counter-productive when sending a big file on a stream. I don't think it belongs in the \"basic scheduling guidance.\"",
+          "createdAt": "2021-10-23T06:57:43Z",
+          "updatedAt": "2021-10-23T06:57:43Z"
+        }
+      ]
+    },
+    {
+      "number": 34,
+      "id": "I_kwDOGNtpaM49ovzu",
+      "title": "Text on number of CID and number of path should be common to single and multiple PN spaces",
+      "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/issues/34",
+      "state": "OPEN",
+      "author": "huitema",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "We mention in the introduction that if a node uses non null CID, it must use different CID for different paths. This is true whether the peers negotiated single or multiple packet number spaces. The text about connection ID in the introduction of the multiple PN space section should be moved to a common section.",
+      "createdAt": "2021-10-23T06:26:14Z",
+      "updatedAt": "2021-10-23T07:42:38Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "body": "In my editorial pass in #30 I already moved some of that text, so let me merge that first (after @Yanmei-Liu Yanmei and @qdeconinck Quentin have reviewer it).\r\n\r\nWhen that is merged and there is still something that needs to move, you could please indicate exactly which part you are talking about?",
+          "createdAt": "2021-10-23T07:42:38Z",
+          "updatedAt": "2021-10-23T07:42:38Z"
+        }
+      ]
+    },
+    {
+      "number": 35,
+      "id": "I_kwDOGNtpaM49owAN",
+      "title": "Path identifier type 2 unclear",
+      "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/issues/35",
+      "state": "OPEN",
+      "author": "huitema",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "In the \"path abandon\" frame, the path identifier is defined as:\r\n~~~\r\n  Path Identifier {\r\n    Identifier Type (i) = 0x00..0x02,\r\n    Path Identifier Content (i),\r\n  }\r\n~~~\r\nBut in the identifier type 2, the \"path identifier content\" is empty. We should fix that.",
+      "createdAt": "2021-10-23T06:31:26Z",
+      "updatedAt": "2021-10-23T06:31:26Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -993,25 +1175,42 @@
       "id": "PR_kwDOGNtpaM4tRJkh",
       "title": "SHOULD -> MUST for use of different CIDs on different paths",
       "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/pull/16",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mirjak",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "There is a SHOULD here, which I believe should be a MUST as we taking about the receiver behaviour here.",
       "createdAt": "2021-10-15T20:18:48Z",
-      "updatedAt": "2021-10-20T09:10:21Z",
+      "updatedAt": "2021-10-23T05:38:33Z",
       "baseRepository": "mirjak/draft-lmbdhk-quic-multipath",
       "baseRefName": "master",
       "baseRefOid": "b6331e57d7373526cc4af756386473ca16ece41a",
       "headRepository": "mirjak/draft-lmbdhk-quic-multipath",
       "headRefName": "mirjak-patch-1",
       "headRefOid": "6be669710bb226f4ac0124ab19529eba4b065ca4",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "closedAt": "2021-10-22T09:08:57Z",
+      "mergedAt": "2021-10-22T09:08:57Z",
+      "mergedBy": "Yanmei-Liu",
+      "mergeCommit": {
+        "oid": "7bbb37fb2db5d8be017016badcc9fb2b312e1c7d"
+      },
+      "comments": [
+        {
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "body": "@huitema @Yanmei-Liu is this ready to merge?",
+          "createdAt": "2021-10-22T08:55:19Z",
+          "updatedAt": "2021-10-22T08:55:19Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Sorry, I am working on several projects in parallel, missed this. Text is fine.",
+          "createdAt": "2021-10-23T05:38:33Z",
+          "updatedAt": "2021-10-23T05:38:33Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOGNtpaM4ukGFC",
@@ -1124,6 +1323,19 @@
           "body": "",
           "createdAt": "2021-10-20T09:10:21Z",
           "updatedAt": "2021-10-20T09:10:21Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4u4qjM",
+          "commit": {
+            "abbreviatedOid": "6be6697"
+          },
+          "author": "Yanmei-Liu",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-10-22T09:07:29Z",
+          "updatedAt": "2021-10-22T09:07:29Z",
           "comments": []
         }
       ]
@@ -1517,19 +1729,541 @@
       "labels": [],
       "body": "Initial attempt to solve #10.",
       "createdAt": "2021-10-18T12:49:40Z",
-      "updatedAt": "2021-10-18T12:49:40Z",
+      "updatedAt": "2021-10-22T07:04:49Z",
       "baseRepository": "mirjak/draft-lmbdhk-quic-multipath",
       "baseRefName": "master",
       "baseRefOid": "960cbcb892f3a106882796b69fb2f995b64bb17b",
       "headRepository": "qdeconinck/draft-lmbdhk-quic-multipath",
       "headRefName": "path-states",
-      "headRefOid": "dbbbbcc7f7e04a81ed5dd16199432ce069de0307",
+      "headRefOid": "3bdc0a29c4851e7d95479e476780d166af8d1022",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGNtpaM4u1fDi",
+          "commit": {
+            "abbreviatedOid": "dbbbbcc"
+          },
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-21T14:21:00Z",
+          "updatedAt": "2021-10-21T14:21:00Z",
+          "comments": [
+            {
+              "originalPosition": 39,
+              "body": "Not sure if we need to use normative language here: MUST -> have to\r\n\r\nAnd do you maybe mean non-final state?",
+              "createdAt": "2021-10-21T14:21:00Z",
+              "updatedAt": "2021-10-21T14:21:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4u1gYA",
+          "commit": {
+            "abbreviatedOid": "dbbbbcc"
+          },
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "state": "CHANGES_REQUESTED",
+          "body": "",
+          "createdAt": "2021-10-21T14:24:45Z",
+          "updatedAt": "2021-10-21T14:33:05Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "Isn't the first step to send (not received) a PATH_CHALLENGE and then you stay in \"Validating\" state until you receive PATH_RESPONSE (which would trigger the transition to the next state)?",
+              "createdAt": "2021-10-21T14:24:45Z",
+              "updatedAt": "2021-10-21T14:33:05Z"
+            },
+            {
+              "originalPosition": 56,
+              "body": "We should not use normative language in this section, however, not sure if normative language is needed in this case.",
+              "createdAt": "2021-10-21T14:28:56Z",
+              "updatedAt": "2021-10-21T14:33:05Z"
+            },
+            {
+              "originalPosition": 59,
+              "body": "\"usage is enabled by\" is a bit unclear. Maybe: ... provided the congestion control and flow control currently allow sending of new data on a path",
+              "createdAt": "2021-10-21T14:32:35Z",
+              "updatedAt": "2021-10-21T14:33:05Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4u1sTL",
+          "commit": {
+            "abbreviatedOid": "dbbbbcc"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-21T14:58:07Z",
+          "updatedAt": "2021-10-21T14:58:07Z",
+          "comments": [
+            {
+              "originalPosition": 39,
+              "body": "Indeed, let's avoid using normative language, and maybe non-final sounds better.",
+              "createdAt": "2021-10-21T14:58:07Z",
+              "updatedAt": "2021-10-21T14:58:07Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4u1s-T",
+          "commit": {
+            "abbreviatedOid": "dbbbbcc"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-21T15:00:02Z",
+          "updatedAt": "2021-10-21T15:00:03Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "The \"initiate path validation\" is indeed sending a PATH_CHALLENGE on the new path, but we can also have the case of a server that received the PATH_CHALLENGE, sent back the PATH_RESPONSE but did not sent PATH_CHALLENGE (yet). Actually, the transition can be simplified by a \"PATH_CHALLENGE sent/received on new path\", and the following one \"PATH_RESPONSE received\".",
+              "createdAt": "2021-10-21T15:00:03Z",
+              "updatedAt": "2021-10-21T15:00:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4u16NJ",
+          "commit": {
+            "abbreviatedOid": "3bdc0a2"
+          },
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-21T15:45:27Z",
+          "updatedAt": "2021-10-21T15:45:27Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "I think I would omit the part in this diagram where  PATH_CHALLENGE is received by not not send and just define that the validating is enter as soon as a PATH_CHALENGE is sent. Or if you want to show this in the diagram then we would need a separate state for this? Or maybe a separate diagram for the initiator and the \"responder\"?",
+              "createdAt": "2021-10-21T15:45:27Z",
+              "updatedAt": "2021-10-21T15:45:27Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4u4O8Z",
+          "commit": {
+            "abbreviatedOid": "3bdc0a2"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-22T07:04:49Z",
+          "updatedAt": "2021-10-22T07:04:49Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "I don't know if we need a specific state for this (or a different name for the state), but the receiver of the PATH_CHALLENGE frame needs to reply a PATH_RESPONSE frame on the viewed 4-tuple using a unused CID. It should probably keep this mapping if later it wants to validate the path (although I think the receiver should also send a PATH_CHALLENGE, but nothing forces it to do so).",
+              "createdAt": "2021-10-22T07:04:49Z",
+              "updatedAt": "2021-10-22T07:04:50Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 28,
+      "id": "PR_kwDOGNtpaM4teVas",
+      "title": "add more illustration figures to path close, maybe need revisions",
+      "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/pull/28",
+      "state": "OPEN",
+      "author": "yfmascgy",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "I added 2 illustration figures describing path close when null-length CIDs are used. This changes are based on the discussion of issue #1 . But I think it may need additional revision.  ",
+      "createdAt": "2021-10-21T05:50:25Z",
+      "updatedAt": "2021-10-23T07:46:55Z",
+      "baseRepository": "mirjak/draft-lmbdhk-quic-multipath",
+      "baseRefName": "master",
+      "baseRefOid": "30e9429950fb215400ed552fc9ea68e1509e9658",
+      "headRepository": "mirjak/draft-lmbdhk-quic-multipath",
+      "headRefName": "dev/path-close-figures",
+      "headRefOid": "b949f72c933ad13a837ffe019a8327a9b2afd2f3",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> I think it would be valuable to also update the description of the Path Identifier Type field of the PATH_ABANDON frame, as I find the current description a bit unclear.\r\n\r\nI have updated the path identifier description. Hope this makes things more clear.",
+          "createdAt": "2021-10-23T07:46:55Z",
+          "updatedAt": "2021-10-23T07:46:55Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGNtpaM4u1l8v",
+          "commit": {
+            "abbreviatedOid": "1d9b085"
+          },
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-21T14:39:49Z",
+          "updatedAt": "2021-10-21T14:39:51Z",
+          "comments": [
+            {
+              "originalPosition": 118,
+              "body": "Isn't that always the case that if a single packet number space is used in one directly is also needs to be used in the other direction?\r\n\r\nAlso the assumption here is because there is a non-zero length CID in on direction, this has to use one packet number space? Maybe better so say this at the beginning of this paragraph.",
+              "createdAt": "2021-10-21T14:39:50Z",
+              "updatedAt": "2021-10-21T14:39:51Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4u1xXk",
+          "commit": {
+            "abbreviatedOid": "1d9b085"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "COLLABORATOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "I'm a bit confused by the second example, as I currently understand the path identifier type, I think there are typos there.",
+          "createdAt": "2021-10-21T15:14:21Z",
+          "updatedAt": "2021-10-21T15:27:22Z",
+          "comments": [
+            {
+              "originalPosition": 72,
+              "body": "I would say \"... use non-zero length CIDs. For the first path, the server's 1-RTT packets use DCID C1... Note that two paths use different packet number spaces.\" Then, I would complement by \"In this case, the client is going to close the first path. It identifies it by the sequence number of the DCID it uses over that path (path identifier type 0x00), hence using the path_id 1. In reply, the server confirms the path using the sequence number of the DCID it uses over that path (path identifier type 0x00), corresponding to path_id 2.",
+              "createdAt": "2021-10-21T15:14:21Z",
+              "updatedAt": "2021-10-21T15:27:22Z"
+            },
+            {
+              "originalPosition": 108,
+              "body": "I would precise that this is still the client that initiates the path closure.",
+              "createdAt": "2021-10-21T15:17:20Z",
+              "updatedAt": "2021-10-21T15:27:23Z"
+            },
+            {
+              "originalPosition": 110,
+              "body": "Shouldn't the server use 0x01 as path_identifier_type instead? Maybe the figure should be updated as well.",
+              "createdAt": "2021-10-21T15:18:50Z",
+              "updatedAt": "2021-10-21T15:27:23Z"
+            },
+            {
+              "originalPosition": 112,
+              "body": "As I understand the path identifier type, it should be 0x00 here",
+              "createdAt": "2021-10-21T15:21:14Z",
+              "updatedAt": "2021-10-21T15:27:23Z"
+            },
+            {
+              "originalPosition": 168,
+              "body": "I suppose it can terminate using a path immediately and maybe send a PATH_ABANDON later, but I assume the use case here is to say that PATH_ABANDON is a kind of graceful path closure, but abrupt closures are also possible.",
+              "createdAt": "2021-10-21T15:25:28Z",
+              "updatedAt": "2021-10-21T15:27:23Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4u4K0i",
+          "commit": {
+            "abbreviatedOid": "1d9b085"
+          },
+          "author": "yfmascgy",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-22T06:39:59Z",
+          "updatedAt": "2021-10-22T06:39:59Z",
+          "comments": [
+            {
+              "originalPosition": 118,
+              "body": "Good suggestion. Yes, moving it to the beginning of the paragraph is more clear.",
+              "createdAt": "2021-10-22T06:39:59Z",
+              "updatedAt": "2021-10-22T06:39:59Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4u4usZ",
+          "commit": {
+            "abbreviatedOid": "db6d389"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "I think it would be valuable to also update the description of the Path Identifier Type field of the PATH_ABANDON frame, as I find the current description a bit unclear.",
+          "createdAt": "2021-10-22T09:25:05Z",
+          "updatedAt": "2021-10-22T09:25:05Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 29,
+      "id": "PR_kwDOGNtpaM4tidpQ",
+      "title": "Update identification of packet number space identifier",
+      "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/pull/29",
+      "state": "OPEN",
+      "author": "qdeconinck",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Attempt to address #27, probably more text will be needed afterwards.",
+      "createdAt": "2021-10-22T09:12:05Z",
+      "updatedAt": "2021-10-23T07:47:52Z",
+      "baseRepository": "mirjak/draft-lmbdhk-quic-multipath",
+      "baseRefName": "master",
+      "baseRefOid": "7bbb37fb2db5d8be017016badcc9fb2b312e1c7d",
+      "headRepository": "qdeconinck/draft-lmbdhk-quic-multipath",
+      "headRefName": "pnsi-zero-length",
+      "headRefOid": "8df480190cdcb0b355920a236cbe5cce467dc9d1",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "body": "I believe this might need a few more updates in the rest of the text. Thee abandon frame support this already but there might be more text needed on the PN space section.",
+          "createdAt": "2021-10-22T17:04:54Z",
+          "updatedAt": "2021-10-22T17:04:54Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "body": "Just as a matter of process: if we don't merge this PR (now) we need another PR (till Monday) that clearly specifies that in case of multipath_enabled=2 both endpoints MUST use connection IDs and if that is not the case the connection MUST be closed with an error. I guess that belongs in the negotiation section (as well as probably one sentence somewhere in the intro).",
+          "createdAt": "2021-10-23T07:47:52Z",
+          "updatedAt": "2021-10-23T07:47:52Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGNtpaM4u7jMY",
+          "commit": {
+            "abbreviatedOid": "8df4801"
+          },
+          "author": "huitema",
+          "authorAssociation": "COLLABORATOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "I would rather keep it simple and require non null connection IDs for the MP variant. I think mixing 5 tuples into low level packet decryption and parsing is asking for trouble. Also, I am concerned that we are introducing here an untested variation, which might make the whole proposal weaker.\r\n\r\nIn any case, the text has to be specialized to the case in which the client, but not the server, use non null connection ID.",
+          "createdAt": "2021-10-23T05:54:13Z",
+          "updatedAt": "2021-10-23T05:57:57Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "I do not agree that this works.\r\n\r\nFor starter, it does not work if the server uses a zero length CID. It that case, in order to create a new path, a client sends a probe with a zero length CID. It arrives at the server on a five tuple that the server has not yet seen. How can the server know which encryption context it should use? The same issue would also happen in the case of NAT rebinding. The server sees a new five tuple, does not know what encryption to apply.\r\n\r\nSo, the first request is to specialize this text to the case in which the client uses zero length CID but the server does not.\r\n\r\nEven in that case, using the five tuple is going to make client-side encryption offload significantly more complex. The offload engines will have to remember all the five tuples used in the connection, and the corresponding keys. This is a new requirement, and it may be difficult to meet by many implementations.\r\n\r\nI think it would be much simpler to accept the limitation: using multiple number spaces requires that both sides use non-null connection IDs.",
+              "createdAt": "2021-10-23T05:54:13Z",
+              "updatedAt": "2021-10-23T05:57:57Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 30,
+      "id": "PR_kwDOGNtpaM4tjbV5",
+      "title": "Editorial pass",
+      "url": "https://github.com/mirjak/draft-lmbdhk-quic-multipath/pull/30",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2021-10-22T14:39:22Z",
+      "updatedAt": "2021-10-23T07:26:25Z",
+      "baseRepository": "mirjak/draft-lmbdhk-quic-multipath",
+      "baseRefName": "master",
+      "baseRefOid": "7bbb37fb2db5d8be017016badcc9fb2b312e1c7d",
+      "headRepository": "mirjak/draft-lmbdhk-quic-multipath",
+      "headRefName": "mirjak-patch-2",
+      "headRefOid": "3686e07f1b2f08df8da9b008fc80968385d9d624",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "body": "I'm still working on this but need to take a little break now.",
+          "createdAt": "2021-10-22T14:42:20Z",
+          "updatedAt": "2021-10-22T14:42:20Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGNtpaM4u564N",
+          "commit": {
+            "abbreviatedOid": "8893fa4"
+          },
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-22T14:40:03Z",
+          "updatedAt": "2021-10-22T14:40:04Z",
+          "comments": [
+            {
+              "originalPosition": 107,
+              "body": "This was moved to the next section and the section were the frame is specified.",
+              "createdAt": "2021-10-22T14:40:03Z",
+              "updatedAt": "2021-10-22T14:40:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4u57Va",
+          "commit": {
+            "abbreviatedOid": "8893fa4"
+          },
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-22T14:41:38Z",
+          "updatedAt": "2021-10-22T14:41:38Z",
+          "comments": [
+            {
+              "originalPosition": 222,
+              "body": "This part was removed as it is more implementation guidance. A sentence that the initial path has the path ID 0 was added to the previous section.\r\n\r\nSomething could be re-added later to the implementation guidance section. Please provide a PR if you think that is useful.  ",
+              "createdAt": "2021-10-22T14:41:38Z",
+              "updatedAt": "2021-10-22T14:41:38Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4u6ejU",
+          "commit": {
+            "abbreviatedOid": "8893fa4"
+          },
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-22T16:59:05Z",
+          "updatedAt": "2021-10-22T16:59:05Z",
+          "comments": [
+            {
+              "originalPosition": 232,
+              "body": "```suggestion\r\n## Using One Packet Number Space\r\n```",
+              "createdAt": "2021-10-22T16:59:05Z",
+              "updatedAt": "2021-10-22T16:59:05Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4u6ers",
+          "commit": {
+            "abbreviatedOid": "8194d6e"
+          },
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-22T16:59:42Z",
+          "updatedAt": "2021-10-22T16:59:42Z",
+          "comments": [
+            {
+              "originalPosition": 66,
+              "body": "I removed the experimental value for now. We should probably add a new one!",
+              "createdAt": "2021-10-22T16:59:42Z",
+              "updatedAt": "2021-10-22T16:59:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4u6fB4",
+          "commit": {
+            "abbreviatedOid": "8194d6e"
+          },
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-22T17:01:20Z",
+          "updatedAt": "2021-10-22T17:01:20Z",
+          "comments": [
+            {
+              "originalPosition": 320,
+              "body": "I removed this, as I understood that we don't support this case anymore. @Yanmei-Liu please confirm!",
+              "createdAt": "2021-10-22T17:01:20Z",
+              "updatedAt": "2021-10-23T07:25:26Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4u7jRW",
+          "commit": {
+            "abbreviatedOid": "e554d06"
+          },
+          "author": "huitema",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-23T06:00:49Z",
+          "updatedAt": "2021-10-23T06:00:50Z",
+          "comments": [
+            {
+              "originalPosition": 320,
+              "body": "I think you wanted to remove lines 409, not line 407.",
+              "createdAt": "2021-10-23T06:00:50Z",
+              "updatedAt": "2021-10-23T06:00:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4u7jit",
+          "commit": {
+            "abbreviatedOid": "4f2f228"
+          },
+          "author": "huitema",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "I think these are good editorial fixes. When reviewing, I fixed half a dozen typos, committing the edits directly. I also opened two issues: the text on allocating CID before opening paths should be moved from the introduction of \"multiple number spaces\" to a common section, maybe the introduction of both spaces; and, the option 2 of the syntax of the path identifier could be simplified. I had previously opened another issue about moving the text on RTT estimates from \"single space\" to a common section.",
+          "createdAt": "2021-10-23T06:18:59Z",
+          "updatedAt": "2021-10-23T06:37:43Z",
+          "comments": [
+            {
+              "originalPosition": 320,
+              "body": "Please disregard my previous comment. I agree with this edit.",
+              "createdAt": "2021-10-23T06:18:59Z",
+              "updatedAt": "2021-10-23T06:37:43Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM4u7kd9",
+          "commit": {
+            "abbreviatedOid": "3686e07"
+          },
+          "author": "mirjak",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-10-23T07:26:24Z",
+          "updatedAt": "2021-10-23T07:26:25Z",
+          "comments": [
+            {
+              "originalPosition": 320,
+              "body": "Yes 407 was edited and keep; 409 was removed.",
+              "createdAt": "2021-10-23T07:26:24Z",
+              "updatedAt": "2021-10-23T07:26:25Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
