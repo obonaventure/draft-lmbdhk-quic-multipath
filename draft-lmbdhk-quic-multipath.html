@@ -1772,14 +1772,14 @@ not cause linkability issue.<a href="#section-6.2.2-4" class="pilcrow">¶</a></p
 
    (Exchanges start on default path)
    1-RTT[]: NEW_CONNECTION_ID[C1, Seq=1] --&gt;
-                         &lt;-- 1-RTT[]: NEW_CONNECTION_ID[S1, Seq=1]
-                         &lt;-- 1-RTT[]: NEW_CONNECTION_ID[S2, Seq=2]
+                       &lt;-- 1-RTT[]: NEW_CONNECTION_ID[S1, Seq=1]
+                       &lt;-- 1-RTT[]: NEW_CONNECTION_ID[S2, Seq=2]
    ...
    (starts new path)
    1-RTT[0]: DCID=S2, PATH_CHALLENGE[X] --&gt;
-                     Checks AEAD using nonce(CID sequence 2, PN 0)
-       &lt;-- 1-RTT[0]: DCID=C1, PATH_RESPONSE[X], PATH_CHALLENGE[Y],
-                                                ACK_MP[Seq=2,PN=0]
+                   Checks AEAD using nonce(CID sequence 2, PN 0)
+     &lt;-- 1-RTT[0]: DCID=C1, PATH_RESPONSE[X], PATH_CHALLENGE[Y],
+                                              ACK_MP[Seq=2,PN=0]
    Checks AEAD using nonce(CID sequence 1, PN 0)
    1-RTT[1]: DCID=S2, PATH_RESPONSE[Y],
              ACK_MP[Seq=1, PN=0], ... --&gt;
@@ -1825,17 +1825,16 @@ frame.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
 <figure id="figure-3">
           <div class="alignLeft art-text artwork" id="section-7.2-4.1">
 <pre>
-  Client                                                          Server
+Client                                                      Server
 
-  (client tells server to abandon a path)
-  1-RTT[X]: DCID=S2 PATH_ABANDON[path_id=1]-&gt;
-                                 (server tells client to abandon a path)
-        &lt;-1-RTT[Y]: DCID=C1 PATH_ABANDON[path_id=2], ACK_MP[Seq=2, PN=X]
-  (client abandons the path that it is using)
-  1-RTT[U]: DCID=S3 RETIRE_CONNECTION_ID[2], ACK_MP[Seq=1, PN=Y] -&gt;
-                             (server abandons the path that it is using)
-       &lt;- 1-RTT[V]: DCID=C2 RETIRE_CONNECTION_ID[1], ACK_MP[Seq=3, PN=U]
-
+(client tells server to abandon a path)
+1-RTT[X]: DCID=S2 PATH_ABANDON[path_id=1]-&gt;
+                           (server tells client to abandon a path)
+  &lt;-1-RTT[Y]: DCID=C1 PATH_ABANDON[path_id=2], ACK_MP[Seq=2, PN=X]
+(client abandons the path that it is using)
+1-RTT[U]: DCID=S3 RETIRE_CONNECTION_ID[2], ACK_MP[Seq=1, PN=Y] -&gt;
+                       (server abandons the path that it is using)
+ &lt;- 1-RTT[V]: DCID=C2 RETIRE_CONNECTION_ID[1], ACK_MP[Seq=3, PN=U]
 </pre>
 </div>
 <figcaption><a href="#figure-3" class="selfRef">Figure 3</a>:
@@ -1981,7 +1980,8 @@ associated ECN marks received on the connection up to this point.<a href="#secti
           <div class="alignLeft art-text artwork" id="section-9.2-3.1">
 <pre>
   ACK_MP Frame {
-    Type (i) = TBD-00..TBD-01 (experiments use 0xbaba00..0xbaba01 or 0x42..x43),
+    Type (i) = TBD-00..TBD-01
+       (experiments use 0xbaba00..0xbaba01 or 0x42..x43),
     Packet Number Space Identifier (i),
     Largest Acknowledged (i),
     ACK Delay (i),
